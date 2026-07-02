@@ -1,6 +1,53 @@
 const registerForm = document.getElementById("registerForm");
 const message = document.getElementById("message");
 
+function showMessage(text, type = "error") {
+  if (!message) return;
+
+  message.textContent = text;
+
+  message.className =
+    type === "success"
+      ? "text-sm text-center font-medium text-green-600"
+      : "text-sm text-center font-medium text-red-600";
+}
+
+function isValidEmail(email) {
+  return email.includes("@") && email.includes(".");
+}
+
+// ===============================
+// Affichage temporaire du mot de passe
+// ===============================
+function holdToShowPassword(inputId, buttonId) {
+  const input = document.getElementById(inputId);
+  const button = document.getElementById(buttonId);
+
+  if (!input || !button) return;
+
+  const showPassword = () => {
+    input.type = "text";
+  };
+
+  const hidePassword = () => {
+    input.type = "password";
+  };
+
+  button.addEventListener("mousedown", showPassword);
+  button.addEventListener("mouseup", hidePassword);
+  button.addEventListener("mouseleave", hidePassword);
+
+  // Support mobile
+  button.addEventListener("touchstart", showPassword);
+  button.addEventListener("touchend", hidePassword);
+}
+
+holdToShowPassword("password", "togglePassword");
+holdToShowPassword("confirmPassword", "toggleConfirmPassword");
+
+// ===============================
+// Inscription
+// ===============================
 if (registerForm) {
   registerForm.addEventListener("submit", async function (event) {
     event.preventDefault();
@@ -10,53 +57,56 @@ if (registerForm) {
     const password = document.getElementById("password").value;
     const confirmPassword = document.getElementById("confirmPassword").value;
 
-    message.textContent = "";
-    message.style.color = "red";
+    showMessage("");
 
     if (!fullName || !email || !password || !confirmPassword) {
-      message.textContent = "Veuillez remplir tous les champs.";
+      showMessage("Veuillez remplir tous les champs.");
       return;
     }
 
-    if (!email.includes("@")) {
-      message.textContent = "Adresse email invalide.";
+    if (!isValidEmail(email)) {
+      showMessage("Adresse email invalide.");
+      return;
+    }
+
+    if (password.length < 6) {
+      showMessage("Le mot de passe doit contenir au moins 6 caractères.");
       return;
     }
 
     if (password !== confirmPassword) {
-      message.textContent = "Les mots de passe ne correspondent pas.";
+      showMessage("Les mots de passe ne correspondent pas.");
       return;
     }
 
     try {
+      showMessage("Création du compte en cours...", "success");
+
       const response = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: getPublicHeaders(),
         body: JSON.stringify({
-          name: fullName,
-          email: email,
-          password: password
-        })
+          fullName,
+          email,
+          password,
+        }),
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
-      if (!response.ok) {
-        message.textContent = data.message || "Erreur lors de l'inscription.";
+      if (!response.ok || !result.success) {
+        showMessage(result.message || "Erreur lors de l'inscription.");
         return;
       }
 
-      message.style.color = "green";
-      message.textContent = "Compte créé avec succès. Redirection...";
+      showMessage("Compte créé avec succès ! Redirection...", "success");
 
-      setTimeout(function () {
+      setTimeout(() => {
         window.location.href = "login.html";
       }, 1500);
-
     } catch (error) {
-      message.textContent = "Erreur réseau. Vérifie que l'API est lancée.";
+      showMessage("Erreur réseau. Vérifie ta connexion internet.");
+      console.error(error);
     }
   });
 }

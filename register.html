@@ -1,47 +1,74 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inscription - Kadea Chat</title>
-  <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register - Kadea Chat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
-<body>
 
-  <main class="auth-container">
-    <section class="auth-card">
-      <h1>Kadea Chat</h1>
-      <h2>Créer un compte</h2>
+<body class="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+  <main class="w-full max-w-md">
+    <div class="text-center mb-6">
+      <div class="w-12 h-12 mx-auto bg-blue-600 text-white rounded-xl flex items-center justify-center text-2xl mb-3">
+        <i class="fa-solid fa-comments"></i>
+      </div>
+      <h1 class="text-2xl font-bold text-blue-600">Kadea Chat</h1>
+    </div>
 
-      <form id="registerForm">
-        <div class="form-group">
-          <label for="fullName">Nom complet</label>
-          <input type="text" id="fullName" placeholder="Ex: Mungwana Obed">
+    <section class="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
+      <h2 class="text-xl font-bold text-slate-900 mb-1">Create Account</h2>
+      <p class="text-sm text-slate-500 mb-6">Join the community and start chatting.</p>
+
+      <form id="registerForm" class="space-y-4">
+        <div>
+          <label for="fullName" class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+          <input id="fullName" type="text" placeholder="John Doe"
+            class="w-full rounded-lg bg-slate-100 border border-slate-200 px-4 py-3 outline-none focus:border-blue-600 focus:bg-white">
         </div>
 
-        <div class="form-group">
-          <label for="email">Adresse email</label>
-          <input type="email" id="email" placeholder="Ex: obed@email.com">
+        <div>
+          <label for="email" class="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
+          <input id="email" type="email" placeholder="name@example.com"
+            class="w-full rounded-lg bg-slate-100 border border-slate-200 px-4 py-3 outline-none focus:border-blue-600 focus:bg-white">
         </div>
 
-        <div class="form-group">
-          <label for="password">Mot de passe</label>
-          <input type="password" id="password" placeholder="Votre mot de passe">
+        <div>
+          <label for="password" class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+          <div class="relative">
+            <input id="password" type="password" placeholder="••••••••"
+              class="w-full rounded-lg bg-slate-100 border border-slate-200 px-4 py-3 pr-12 outline-none focus:border-blue-600 focus:bg-white">
+            <button type="button" id="togglePassword"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-blue-600">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="confirmPassword">Confirmer le mot de passe</label>
-          <input type="password" id="confirmPassword" placeholder="Confirmez le mot de passe">
+        <div>
+          <label for="confirmPassword" class="block text-sm font-medium text-slate-700 mb-1">Confirm Password</label>
+          <div class="relative">
+            <input id="confirmPassword" type="password" placeholder="••••••••"
+              class="w-full rounded-lg bg-slate-100 border border-slate-200 px-4 py-3 pr-12 outline-none focus:border-blue-600 focus:bg-white">
+            <button type="button" id="toggleConfirmPassword"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-blue-600">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
         </div>
 
-        <p id="message"></p>
+        <p id="message" class="text-sm text-center font-medium"></p>
 
-        <button type="submit">S'inscrire</button>
+        <button type="submit"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg py-3 transition">
+          Create Account →
+        </button>
       </form>
 
-      <p class="auth-link">
-        Déjà un compte ?
-        <a href="login.html">Se connecter</a>
+      <p class="text-center text-sm text-slate-500 mt-5">
+        Already have an account?
+        <a href="login.html" class="text-blue-600 font-semibold hover:underline">Log in</a>
       </p>
     </section>
   </main>
