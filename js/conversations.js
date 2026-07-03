@@ -37,6 +37,18 @@ function getConversationName(conversation) {
   return conversation.name || conversation.title || "Conversation";
 }
 
+function getLastMessage(conversation) {
+  if (conversation.lastMessage?.content) {
+    return conversation.lastMessage.content;
+  }
+
+  if (conversation.messages && conversation.messages.length > 0) {
+    return conversation.messages[conversation.messages.length - 1].content;
+  }
+
+  return "Aucun message pour le moment";
+}
+
 function renderConversations(list) {
   conversationsList.innerHTML = "";
 
@@ -47,6 +59,7 @@ function renderConversations(list) {
 
   list.forEach(conversation => {
     const name = getConversationName(conversation);
+    const lastMessage = getLastMessage(conversation);
     const article = document.createElement("article");
 
     article.className = "p-4 border-b border-slate-100 hover:bg-blue-50 cursor-pointer transition";
@@ -58,7 +71,7 @@ function renderConversations(list) {
         </div>
         <div class="flex-1 min-w-0">
           <h3 class="font-semibold text-slate-900 truncate">${name}</h3>
-          <p class="text-sm text-slate-500 truncate">Aucun message pour le moment</p>
+          <p class="text-sm text-slate-500 truncate">${lastMessage}</p>
         </div>
       </div>
     `;
@@ -66,6 +79,10 @@ function renderConversations(list) {
     article.addEventListener("click", () => {
       document.getElementById("chatName").textContent = name;
       document.getElementById("chatAvatar").textContent = getInitials(name);
+
+      if (typeof window.loadMessages === "function") {
+        window.loadMessages(conversation.id);
+      }
     });
 
     conversationsList.appendChild(article);
@@ -90,6 +107,8 @@ async function loadConversations() {
   }
 }
 
+window.loadConversations = loadConversations;
+
 async function loadUsers() {
   try {
     usersList.innerHTML = `<p class="text-sm text-slate-500">Chargement des utilisateurs...</p>`;
@@ -101,8 +120,6 @@ async function loadUsers() {
     });
 
     const result = await response.json();
-    console.log("Réponse utilisateurs :", result);
-
     const users = extractUsers(result);
     renderUsers(users);
   } catch (error) {
@@ -140,7 +157,6 @@ function renderUsers(users) {
     `;
 
     button.addEventListener("click", () => createPrivateConversation(user.id, name));
-
     usersList.appendChild(button);
   });
 }
@@ -161,7 +177,6 @@ async function createPrivateConversation(userId, userName) {
     });
 
     const result = await response.json();
-    console.log("Création conversation :", result);
 
     if (!response.ok || !result.success) {
       usersList.innerHTML = `<p class="text-sm text-red-500">${result.message || "Impossible de créer la conversation."}</p>`;
