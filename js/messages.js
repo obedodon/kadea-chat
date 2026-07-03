@@ -16,6 +16,7 @@ function getCurrentUser() {
 
 function formatTime(date) {
   if (!date) return "";
+
   return new Date(date).toLocaleTimeString("fr-FR", {
     hour: "2-digit",
     minute: "2-digit",
@@ -23,7 +24,10 @@ function formatTime(date) {
 }
 
 function extractMessages(result) {
-  return result.data?.messages || result.data || result.messages || [];
+  if (Array.isArray(result.data?.messages)) return result.data.messages;
+  if (Array.isArray(result.data)) return result.data;
+  if (Array.isArray(result.messages)) return result.messages;
+  return [];
 }
 
 function getMessageSenderId(message) {
@@ -32,6 +36,7 @@ function getMessageSenderId(message) {
 
 function renderMessages(messages) {
   const currentUser = getCurrentUser();
+
   messagesContainer.innerHTML = "";
 
   if (!messages.length) {
@@ -50,11 +55,11 @@ function renderMessages(messages) {
     const div = document.createElement("div");
 
     div.className = isMine
-      ? "max-w-md ml-auto bg-blue-600 text-white rounded-xl rounded-tr-none p-4"
-      : "max-w-md bg-white border border-slate-200 text-slate-700 rounded-xl rounded-tl-none p-4";
+      ? "max-w-md ml-auto bg-blue-600 text-white rounded-xl rounded-tr-none p-4 shadow-sm"
+      : "max-w-md bg-white border border-slate-200 text-slate-700 rounded-xl rounded-tl-none p-4 shadow-sm";
 
     div.innerHTML = `
-      <p>${message.content}</p>
+      <p class="leading-relaxed">${message.content}</p>
       <span class="block text-xs mt-2 ${isMine ? "text-blue-100" : "text-slate-400"}">
         ${formatTime(message.createdAt)}
       </span>
@@ -94,7 +99,8 @@ async function loadMessages(conversationId) {
       return;
     }
 
-    renderMessages(extractMessages(result));
+    const messages = extractMessages(result);
+    renderMessages(messages);
   } catch (error) {
     messagesContainer.innerHTML = `
       <div class="h-full flex items-center justify-center text-red-500">
@@ -122,6 +128,7 @@ messageForm?.addEventListener("submit", async (event) => {
     const response = await fetch(`${API_URL}/conversations/${selectedConversationId}/messages`, {
       method: "POST",
       headers: getAuthHeaders(),
+      cache: "no-store",
       body: JSON.stringify({ content }),
     });
 
@@ -132,14 +139,16 @@ messageForm?.addEventListener("submit", async (event) => {
       alert(result.message || "Impossible d'envoyer le message.");
       return;
     }
-messageInput.value = "";
 
-await loadMessages(selectedConversationId);
+    messageInput.value = "";
 
-if (typeof window.loadConversations === "function") {
-  window.loadConversations();
-};
-  } catch {
+    await loadMessages(selectedConversationId);
+
+    if (typeof window.loadConversations === "function") {
+      window.loadConversations();
+    }
+  } catch (error) {
     alert("Erreur réseau lors de l'envoi du message.");
+    console.error(error);
   }
 });
