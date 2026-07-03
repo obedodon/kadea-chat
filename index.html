@@ -18,13 +18,21 @@
         </div>
 
         <nav class="flex flex-col items-center gap-5 text-slate-500">
-          <button class="text-blue-600"><i class="fa-solid fa-message"></i></button>
-          <a href="profile.html" class="hover:text-blue-600 transition"><i class="fa-solid fa-user"></i></a>
-          <button class="hover:text-blue-600 transition"><i class="fa-solid fa-gear"></i></button>
+          <button class="text-blue-600 transition hover:scale-110">
+            <i class="fa-solid fa-message"></i>
+          </button>
+
+          <a href="profile.html" class="hover:text-blue-600 transition hover:scale-110">
+            <i class="fa-solid fa-user"></i>
+          </a>
+
+          <button class="hover:text-blue-600 transition hover:scale-110">
+            <i class="fa-solid fa-gear"></i>
+          </button>
         </nav>
       </div>
 
-      <button onclick="logout()" class="text-red-500 hover:text-red-600 transition">
+      <button onclick="logout()" class="text-red-500 hover:text-red-600 transition hover:scale-110">
         <i class="fa-solid fa-right-from-bracket"></i>
       </button>
     </aside>
@@ -64,18 +72,35 @@
           </div>
         </div>
 
-        <div class="flex items-center gap-3 text-slate-500">
-          <button class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-slate-100 hover:text-blue-600 hover:scale-110">
+        <div class="relative flex items-center gap-3 text-slate-500">
+          <button id="videoCallBtn" class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-slate-100 hover:text-blue-600 hover:scale-110">
             <i class="fa-solid fa-video"></i>
           </button>
 
-          <button class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-slate-100 hover:text-green-600 hover:scale-110">
+          <button id="audioCallBtn" class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-slate-100 hover:text-green-600 hover:scale-110">
             <i class="fa-solid fa-phone"></i>
           </button>
 
-          <button class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-slate-100 hover:text-slate-900 hover:scale-110">
+          <button id="chatMenuBtn" class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-slate-100 hover:text-slate-900 hover:scale-110">
             <i class="fa-solid fa-ellipsis-vertical"></i>
           </button>
+
+          <div id="chatMenu" class="hidden absolute right-0 top-12 w-56 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden z-40">
+            <a href="profile.html" class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-100">
+              <i class="fa-solid fa-user text-blue-600"></i>
+              Voir mon profil
+            </a>
+
+            <button id="clearConversationBtn" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-100">
+              <i class="fa-solid fa-broom text-orange-500"></i>
+              Effacer la conversation
+            </button>
+
+            <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50">
+              <i class="fa-solid fa-right-from-bracket"></i>
+              Déconnexion
+            </button>
+          </div>
         </div>
       </header>
 
@@ -87,7 +112,7 @@
 
       <footer class="bg-white border-t border-slate-200 p-4">
         <form id="messageForm" class="flex items-center gap-3">
-          <button type="button" class="text-slate-400 hover:text-blue-600 transition">
+          <button type="button" id="emojiBtn" class="text-slate-400 hover:text-blue-600 transition hover:scale-110">
             <i class="fa-regular fa-face-smile text-xl"></i>
           </button>
 
@@ -116,6 +141,18 @@
       <div id="usersList" class="space-y-2 max-h-80 overflow-y-auto">
         <p class="text-sm text-slate-500">Chargement des utilisateurs...</p>
       </div>
+    </div>
+  </div>
+
+  <div id="uiModal" class="hidden fixed inset-0 bg-black/40 items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-sm p-6 text-center">
+      <div id="uiModalIcon" class="text-4xl mb-3"></div>
+      <h2 id="uiModalTitle" class="text-xl font-bold text-slate-900 mb-2"></h2>
+      <p id="uiModalText" class="text-sm text-slate-500 mb-5"></p>
+
+      <button id="closeUiModal" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition">
+        Fermer
+      </button>
     </div>
   </div>
 
