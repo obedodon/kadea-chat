@@ -18,15 +18,9 @@
         </div>
 
         <nav class="flex flex-col items-center gap-5 text-slate-500">
-          <button class="text-blue-600">
-            <i class="fa-solid fa-message"></i>
-          </button>
-          <a href="profile.html">
-            <i class="fa-solid fa-user"></i>
-          </a>
-          <button>
-            <i class="fa-solid fa-gear"></i>
-          </button>
+          <button class="text-blue-600"><i class="fa-solid fa-message"></i></button>
+          <a href="profile.html"><i class="fa-solid fa-user"></i></a>
+          <button><i class="fa-solid fa-gear"></i></button>
         </nav>
       </div>
 
@@ -41,70 +35,24 @@
 
         <div class="relative">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-          <input
-            type="text"
-            placeholder="Search conversations..."
-            class="w-full bg-slate-100 rounded-lg pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <input id="searchConversation" type="text" placeholder="Search conversations..."
+            class="w-full bg-slate-100 rounded-lg pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
       </div>
 
-      <div class="flex-1 overflow-y-auto">
-        <article class="p-4 border-b border-slate-100 bg-blue-50 cursor-pointer">
-          <div class="flex gap-3">
-            <div class="w-11 h-11 rounded-full bg-orange-200 flex items-center justify-center font-bold text-orange-700">
-              SA
-            </div>
-            <div class="flex-1">
-              <div class="flex justify-between">
-                <h3 class="font-semibold text-slate-900">Sarah Connor</h3>
-                <span class="text-xs text-blue-600">14:30</span>
-              </div>
-              <p class="text-sm text-slate-500 truncate">Hey Alex! Did you manage to look at the designs?</p>
-            </div>
-          </div>
-        </article>
-
-        <article class="p-4 border-b border-slate-100 hover:bg-slate-50 cursor-pointer">
-          <div class="flex gap-3">
-            <div class="w-11 h-11 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-700">
-              JD
-            </div>
-            <div class="flex-1">
-              <div class="flex justify-between">
-                <h3 class="font-semibold text-slate-900">John Doe</h3>
-                <span class="text-xs text-slate-400">Yesterday</span>
-              </div>
-              <p class="text-sm text-slate-500 truncate">Can you send me those files again?</p>
-            </div>
-          </div>
-        </article>
-
-        <article class="p-4 border-b border-slate-100 hover:bg-slate-50 cursor-pointer">
-          <div class="flex gap-3">
-            <div class="w-11 h-11 rounded-full bg-pink-200 flex items-center justify-center font-bold text-pink-700">
-              ML
-            </div>
-            <div class="flex-1">
-              <div class="flex justify-between">
-                <h3 class="font-semibold text-slate-900">Maria Lopez</h3>
-                <span class="text-xs text-slate-400">Monday</span>
-              </div>
-              <p class="text-sm text-slate-500 truncate">The project deadline has been moved.</p>
-            </div>
-          </div>
-        </article>
+      <div id="conversationsList" class="flex-1 overflow-y-auto">
+        <p class="p-4 text-sm text-slate-500">Chargement des conversations...</p>
       </div>
     </section>
 
     <section class="flex-1 flex flex-col bg-slate-50">
       <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-orange-200 flex items-center justify-center font-bold text-orange-700">
-            SA
+          <div id="chatAvatar" class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-700">
+            KC
           </div>
           <div>
-            <h2 class="font-semibold text-slate-900">Sarah Connor</h2>
+            <h2 id="chatName" class="font-semibold text-slate-900">Sélectionne une conversation</h2>
             <p class="text-xs text-green-600">● Online</p>
           </div>
         </div>
@@ -116,43 +64,20 @@
         </div>
       </header>
 
-      <div class="flex-1 p-6 overflow-y-auto space-y-5">
-        <div class="text-center">
-          <span class="text-xs bg-slate-200 text-slate-500 px-3 py-1 rounded-full">Today</span>
-        </div>
-
-        <div class="max-w-lg bg-white border border-slate-200 rounded-xl rounded-tl-none p-4 text-slate-700">
-          <p>Hey Alex! Did you manage to look at the designs I sent over last night?</p>
-          <span class="block text-xs text-slate-400 mt-2">14:32</span>
-        </div>
-
-        <div class="max-w-lg ml-auto bg-blue-600 text-white rounded-xl rounded-tr-none p-4">
-          <p>Hey Sarah! Yes, I just finished reviewing them. They look incredible!</p>
-          <span class="block text-xs text-blue-100 mt-2">14:35</span>
-        </div>
-
-        <div class="max-w-lg ml-auto bg-blue-600 text-white rounded-xl rounded-tr-none p-4">
-          <p>The new color palette really makes the dashboard pop.</p>
-          <span class="block text-xs text-blue-100 mt-2">14:36</span>
-        </div>
-
-        <div class="max-w-lg bg-white border border-slate-200 rounded-xl rounded-tl-none p-4 text-slate-700">
-          <p>Awesome! I was a bit worried about the contrast on the charts.</p>
-          <span class="block text-xs text-slate-400 mt-2">14:38</span>
+      <div id="messagesContainer" class="flex-1 p-6 overflow-y-auto space-y-5">
+        <div class="h-full flex items-center justify-center text-slate-400">
+          Clique sur une conversation pour afficher les messages.
         </div>
       </div>
 
       <footer class="bg-white border-t border-slate-200 p-4">
-        <form class="flex items-center gap-3">
+        <form id="messageForm" class="flex items-center gap-3">
           <button type="button" class="text-slate-400 hover:text-blue-600">
             <i class="fa-regular fa-face-smile text-xl"></i>
           </button>
 
-          <input
-            type="text"
-            placeholder="Type a message..."
-            class="flex-1 bg-slate-100 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <input id="messageInput" type="text" placeholder="Type a message..."
+            class="flex-1 bg-slate-100 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" />
 
           <button type="submit" class="w-11 h-11 bg-blue-600 hover:bg-blue-700 text-white rounded-full">
             <i class="fa-solid fa-paper-plane"></i>
@@ -164,5 +89,6 @@
 
   <script src="js/api.js"></script>
   <script src="js/main.js"></script>
+  <script src="js/conversations.js"></script>
 </body>
 </html>
