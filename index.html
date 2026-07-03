@@ -19,19 +19,26 @@
 
         <nav class="flex flex-col items-center gap-5 text-slate-500">
           <button class="text-blue-600"><i class="fa-solid fa-message"></i></button>
-          <a href="profile.html"><i class="fa-solid fa-user"></i></a>
-          <button><i class="fa-solid fa-gear"></i></button>
+          <a href="profile.html" class="hover:text-blue-600 transition"><i class="fa-solid fa-user"></i></a>
+          <button class="hover:text-blue-600 transition"><i class="fa-solid fa-gear"></i></button>
         </nav>
       </div>
 
-      <button onclick="logout()" class="text-red-500 hover:text-red-600">
+      <button onclick="logout()" class="text-red-500 hover:text-red-600 transition">
         <i class="fa-solid fa-right-from-bracket"></i>
       </button>
     </aside>
 
     <section class="w-80 bg-white border-r border-slate-200 flex flex-col">
       <div class="p-4 border-b border-slate-200">
-        <h1 class="text-xl font-bold text-blue-600 mb-4">Kadea Chat</h1>
+        <div class="flex items-center justify-between mb-4">
+          <h1 class="text-xl font-bold text-blue-600">Kadea Chat</h1>
+
+          <button id="openNewConversationModal"
+            class="w-9 h-9 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition hover:scale-110">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+        </div>
 
         <div class="relative">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
@@ -57,10 +64,18 @@
           </div>
         </div>
 
-        <div class="flex items-center gap-5 text-slate-500">
-          <button><i class="fa-solid fa-video"></i></button>
-          <button><i class="fa-solid fa-phone"></i></button>
-          <button><i class="fa-solid fa-ellipsis-vertical"></i></button>
+        <div class="flex items-center gap-3 text-slate-500">
+          <button class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-slate-100 hover:text-blue-600 hover:scale-110">
+            <i class="fa-solid fa-video"></i>
+          </button>
+
+          <button class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-slate-100 hover:text-green-600 hover:scale-110">
+            <i class="fa-solid fa-phone"></i>
+          </button>
+
+          <button class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-slate-100 hover:text-slate-900 hover:scale-110">
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+          </button>
         </div>
       </header>
 
@@ -72,20 +87,37 @@
 
       <footer class="bg-white border-t border-slate-200 p-4">
         <form id="messageForm" class="flex items-center gap-3">
-          <button type="button" class="text-slate-400 hover:text-blue-600">
+          <button type="button" class="text-slate-400 hover:text-blue-600 transition">
             <i class="fa-regular fa-face-smile text-xl"></i>
           </button>
 
           <input id="messageInput" type="text" placeholder="Type a message..."
             class="flex-1 bg-slate-100 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" />
 
-          <button type="submit" class="w-11 h-11 bg-blue-600 hover:bg-blue-700 text-white rounded-full">
+          <button type="submit" class="w-11 h-11 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition hover:scale-110">
             <i class="fa-solid fa-paper-plane"></i>
           </button>
         </form>
       </footer>
     </section>
   </main>
+
+  <div id="newConversationModal" class="hidden fixed inset-0 bg-black/40 items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold text-slate-900">Nouvelle conversation</h2>
+        <button id="closeNewConversationModal" class="text-slate-500 hover:text-red-500 transition">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+
+      <p class="text-sm text-slate-500 mb-4">Choisis un utilisateur pour démarrer une discussion privée.</p>
+
+      <div id="usersList" class="space-y-2 max-h-80 overflow-y-auto">
+        <p class="text-sm text-slate-500">Chargement des utilisateurs...</p>
+      </div>
+    </div>
+  </div>
 
   <script src="js/api.js"></script>
   <script src="js/main.js"></script>
