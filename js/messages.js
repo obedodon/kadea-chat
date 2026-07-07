@@ -14,13 +14,29 @@ function getCurrentUser() {
   }
 }
 
-function formatTime(date) {
+function formatMessageDate(date) {
   if (!date) return "";
 
-  return new Date(date).toLocaleTimeString("fr-FR", {
+  const messageDate = new Date(date);
+  const today = new Date();
+
+  const isToday = messageDate.toDateString() === today.toDateString();
+
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+
+  const isYesterday = messageDate.toDateString() === yesterday.toDateString();
+
+  const time = messageDate.toLocaleTimeString("fr-FR", {
     hour: "2-digit",
     minute: "2-digit",
   });
+
+  if (isToday) return `Aujourd'hui à ${time}`;
+  if (isYesterday) return `Hier à ${time}`;
+
+  const fullDate = messageDate.toLocaleDateString("fr-FR");
+  return `${fullDate} à ${time}`;
 }
 
 function extractMessages(result) {
@@ -61,7 +77,7 @@ function renderMessages(messages) {
     div.innerHTML = `
       <p class="leading-relaxed">${message.content}</p>
       <span class="block text-xs mt-2 ${isMine ? "text-blue-100" : "text-slate-400"}">
-        ${formatTime(message.createdAt)}
+        ${formatMessageDate(message.createdAt)}
       </span>
     `;
 
@@ -99,8 +115,7 @@ async function loadMessages(conversationId) {
       return;
     }
 
-    const messages = extractMessages(result);
-    renderMessages(messages);
+    renderMessages(extractMessages(result));
   } catch (error) {
     messagesContainer.innerHTML = `
       <div class="h-full flex items-center justify-center text-red-500">
