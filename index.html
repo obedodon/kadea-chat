@@ -69,9 +69,7 @@
           </div>
 
           <div>
-            <h2 id="chatName" class="font-semibold text-slate-900">
-              Sélectionne une conversation
-            </h2>
+            <h2 id="chatName" class="font-semibold text-slate-900">Sélectionne une conversation</h2>
             <p class="text-xs text-green-600">● Online</p>
           </div>
         </div>
@@ -162,18 +160,21 @@
     </div>
   </div>
 
-  <div id="conversationAvatarModal" class="hidden fixed inset-0 bg-black/70 items-center justify-center z-50">
-  <div class="relative">
-    <button id="closeConversationAvatarModal" class="absolute -top-12 right-0 text-white text-4xl">
-      ×
-    </button>
-    <h2 id="conversationAvatarName" class="text-white text-center text-xl font-bold mb-4"></h2>
+  <div id="conversationAvatarModal" class="hidden fixed inset-0 bg-black/90 items-center justify-center z-50 p-6">
+    <div class="relative w-full h-full flex flex-col items-center justify-center">
+      <button id="closeConversationAvatarModal"
+        class="absolute top-4 right-6 text-white text-4xl hover:scale-110 transition">
+        ×
+      </button>
 
-    <div id="conversationBigAvatar"
-      class="w-80 h-80 rounded-full bg-white overflow-hidden flex items-center justify-center text-7xl font-bold text-blue-600">
+      <h2 id="conversationAvatarName" class="text-white text-2xl font-bold mb-6"></h2>
+
+      <div id="conversationBigAvatar"
+        class="max-w-[90vw] max-h-[80vh] overflow-hidden flex items-center justify-center text-7xl font-bold text-blue-600">
+      </div>
     </div>
   </div>
-</div>
+
   <script src="js/api.js"></script>
   <script src="js/main.js"></script>
   <script src="js/conversations.js"></script>
