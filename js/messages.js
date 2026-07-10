@@ -230,15 +230,7 @@ function renderMessages(messages) {
           }
         "
       >
-        ${
-          !isMine
-            ? `
-              <p class="text-xs font-semibold text-blue-600 dark:text-blue-300 mb-1">
-                ${escapeHtml(senderName)}
-              </p>
-            `
-            : ""
-        }
+        
 
         <p class="text-sm leading-relaxed whitespace-pre-wrap break-words pr-12">
           ${safeContent}

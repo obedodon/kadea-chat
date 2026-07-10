@@ -1,5 +1,11 @@
+/* ==================================================
+   PROTECTION DES PAGES
+================================================== */
+
 function protectPage() {
-  if (!localStorage.getItem("token")) {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
     window.location.href = "login.html";
   }
 }
@@ -7,179 +13,259 @@ function protectPage() {
 function logout() {
   localStorage.removeItem("token");
   localStorage.removeItem("user");
+
   window.location.href = "login.html";
 }
 
 protectPage();
 
-// UTILISATEUR CONNECTÉ
-async function showConnectedUserName() {
-  const connectedUserName = document.getElementById("connectedUserName");
 
-  if (!connectedUserName) return;
 
+/* ==================================================
+   UTILISATEUR CONNECTÉ
+================================================== */
+
+function getConnectedUser() {
   try {
-    connectedUserName.textContent = "";
+    const user = localStorage.getItem("user");
 
-    const response = await fetch(`${API_URL}/auth/me`, {
-      method: "GET",
-      headers: getAuthHeaders(),
-      cache: "no-store",
-    });
-
-    const result = await response.json();
-    console.log("Utilisateur connecté :", result);
-
-    if (!response.ok || !result.success) {
-      localStorage.removeItem("user");
-      connectedUserName.textContent = "Utilisateur";
-      return;
+    if (!user || user === "undefined") {
+      return null;
     }
 
-    const user = result.data?.user || result.data;
+    return JSON.parse(user);
 
-    localStorage.removeItem("user");
-    localStorage.setItem("user", JSON.stringify(user));
-
-    connectedUserName.textContent =
-      user.fullName || user.name || "Utilisateur";
   } catch (error) {
-    console.error(error);
-    connectedUserName.textContent = "Utilisateur";
+
+    console.error("Erreur utilisateur :", error);
+    return null;
   }
 }
 
-showConnectedUserName();
 
-// MENU ⋮
-const chatMenuBtn = document.getElementById("chatMenuBtn");
-const chatMenu = document.getElementById("chatMenu");
+function displayConnectedUser() {
 
-chatMenuBtn?.addEventListener("click", (event) => {
-  event.stopPropagation();
-  chatMenu?.classList.toggle("hidden");
-});
+  const connectedUserName =
+    document.getElementById("connectedUserName");
 
-document.addEventListener("click", () => {
-  chatMenu?.classList.add("hidden");
-});
 
-// MODALE UI
-const uiModal = document.getElementById("uiModal");
-const uiModalIcon = document.getElementById("uiModalIcon");
-const uiModalTitle = document.getElementById("uiModalTitle");
-const uiModalText = document.getElementById("uiModalText");
-const closeUiModal = document.getElementById("closeUiModal");
+  const user = getConnectedUser();
+
+
+  if (!connectedUserName || !user) {
+    return;
+  }
+
+
+  connectedUserName.textContent =
+    user.fullName ||
+    user.name ||
+    user.username ||
+    "Utilisateur";
+
+}
+
+
+displayConnectedUser();
+
+
+
+
+/* ==================================================
+   BOUTONS APPEL + MENU
+================================================== */
+
+const videoCallBtn =
+  document.getElementById("videoCallBtn");
+
+const audioCallBtn =
+  document.getElementById("audioCallBtn");
+
+const chatMenuBtn =
+  document.getElementById("chatMenuBtn");
+
+const chatMenu =
+  document.getElementById("chatMenu");
+
+const clearConversationBtn =
+  document.getElementById("clearConversationBtn");
+
+
+
+/* ==================================================
+   MODAL SIMPLE
+================================================== */
+
+const uiModal =
+  document.getElementById("uiModal");
+
+const uiModalIcon =
+  document.getElementById("uiModalIcon");
+
+const uiModalTitle =
+  document.getElementById("uiModalTitle");
+
+const uiModalText =
+  document.getElementById("uiModalText");
+
+const closeUiModal =
+  document.getElementById("closeUiModal");
+
+
 
 function openUiModal(icon, title, text) {
+
   if (!uiModal) return;
 
+
   uiModalIcon.textContent = icon;
+
   uiModalTitle.textContent = title;
+
   uiModalText.textContent = text;
 
+
   uiModal.classList.remove("hidden");
+
   uiModal.classList.add("flex");
 }
 
-function closeModal() {
-  uiModal?.classList.add("hidden");
-  uiModal?.classList.remove("flex");
+
+
+function closeUiModalBox() {
+
+  if (!uiModal) return;
+
+
+  uiModal.classList.add("hidden");
+
+  uiModal.classList.remove("flex");
+
 }
 
-closeUiModal?.addEventListener("click", closeModal);
 
-uiModal?.addEventListener("click", (event) => {
-  if (event.target === uiModal) closeModal();
-});
 
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") closeModal();
-});
+/* ==================================================
+   APPEL VIDÉO
+================================================== */
 
-// APPEL VIDÉO
-document.getElementById("videoCallBtn")?.addEventListener("click", () => {
-  openUiModal(
-    "📹",
-    "Appel vidéo",
-    "Cette fonctionnalité sera disponible prochainement."
-  );
-});
+videoCallBtn?.addEventListener(
+  "click",
+  () => {
 
-// APPEL AUDIO
-document.getElementById("audioCallBtn")?.addEventListener("click", () => {
-  openUiModal(
-    "📞",
-    "Appel audio",
-    "Cette fonctionnalité sera disponible prochainement."
-  );
-});
+    openUiModal(
+      "📹",
+      "Appel vidéo",
+      "Cette fonctionnalité sera disponible prochainement."
+    );
 
-// EFFACER CONVERSATION
-document.getElementById("clearConversationBtn")?.addEventListener("click", () => {
-  chatMenu?.classList.add("hidden");
-  openUiModal(
-    "🧹",
-    "Effacer la conversation",
-    "Cette fonctionnalité sera connectée plus tard."
-  );
-});
-
-// MODE SOMBRE
-const darkStyle = document.createElement("style");
-darkStyle.textContent = `
-  body.dark-mode,
-  body.dark-mode .bg-slate-50,
-  body.dark-mode .bg-slate-100 {
-    background: #0f172a !important;
-    color: white !important;
   }
+);
 
-  body.dark-mode aside,
-  body.dark-mode section,
-  body.dark-mode header,
-  body.dark-mode footer,
-  body.dark-mode .bg-white {
-    background: #1e293b !important;
-    color: white !important;
-    border-color: #334155 !important;
+
+
+/* ==================================================
+   APPEL AUDIO
+================================================== */
+
+audioCallBtn?.addEventListener(
+  "click",
+  () => {
+
+    openUiModal(
+      "📞",
+      "Appel audio",
+      "Cette fonctionnalité sera disponible prochainement."
+    );
+
   }
+);
 
-  body.dark-mode input {
-    background: #334155 !important;
-    color: white !important;
+
+
+
+/* ==================================================
+   FERMETURE MODAL
+================================================== */
+
+closeUiModal?.addEventListener(
+  "click",
+  closeUiModalBox
+);
+
+
+
+uiModal?.addEventListener(
+  "click",
+  (event) => {
+
+    if (event.target === uiModal) {
+
+      closeUiModalBox();
+
+    }
+
   }
+);
 
-  body.dark-mode input::placeholder {
-    color: #cbd5e1 !important;
+
+
+/* ==================================================
+   MENU 3 POINTS
+================================================== */
+
+
+chatMenuBtn?.addEventListener(
+  "click",
+  (event) => {
+
+    event.stopPropagation();
+
+    chatMenu?.classList.toggle("hidden");
+
   }
+);
 
-  body.dark-mode .text-slate-900,
-  body.dark-mode .text-slate-700,
-  body.dark-mode .text-slate-500,
-  body.dark-mode .text-slate-400 {
-    color: white !important;
+
+
+
+document.addEventListener(
+  "click",
+  (event) => {
+
+    if (
+      chatMenu &&
+      !chatMenu.classList.contains("hidden") &&
+      !chatMenu.contains(event.target)
+    ) {
+
+      chatMenu.classList.add("hidden");
+
+    }
+
   }
-`;
-document.head.appendChild(darkStyle);
+);
 
-const themeToggle = document.getElementById("themeToggle");
-const themeIcon = document.getElementById("themeIcon");
 
-function applyTheme() {
-  if (localStorage.getItem("theme") === "dark") {
-    document.body.classList.add("dark-mode");
-    if (themeIcon) themeIcon.className = "fa-solid fa-sun";
-  } else {
-    document.body.classList.remove("dark-mode");
-    if (themeIcon) themeIcon.className = "fa-solid fa-moon";
+
+
+/* ==================================================
+   EFFACER CONVERSATION
+================================================== */
+
+
+clearConversationBtn?.addEventListener(
+  "click",
+  () => {
+
+    chatMenu?.classList.add("hidden");
+
+
+    openUiModal(
+      "🧹",
+      "Effacer la conversation",
+      "Cette fonctionnalité sera connectée à l'API plus tard."
+    );
+
   }
-}
-
-themeToggle?.addEventListener("click", () => {
-  const isDark = localStorage.getItem("theme") === "dark";
-  localStorage.setItem("theme", isDark ? "light" : "dark");
-  applyTheme();
-});
-
-applyTheme();
+);
