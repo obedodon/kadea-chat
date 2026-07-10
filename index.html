@@ -1,183 +1,513 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Chat - Kadea Chat</title>
+
+  <script>
+    tailwind.config = {
+      darkMode: "class"
+    };
+  </script>
+
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <link 
+    rel="stylesheet" 
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
 </head>
 
-<body class="h-screen bg-slate-100 overflow-hidden">
-  <main class="h-screen flex">
 
-    <aside class="w-16 bg-white border-r border-slate-200 flex flex-col items-center justify-between py-4">
-      <div class="space-y-6">
-        <div class="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center">
-          <i class="fa-solid fa-comments"></i>
-        </div>
+<body class="h-screen bg-slate-100 dark:bg-slate-900 overflow-hidden transition-colors">
 
-        <nav class="flex flex-col items-center gap-5 text-slate-500">
-          <button class="text-blue-600 transition hover:scale-110">
-            <i class="fa-solid fa-message"></i>
-          </button>
+<main class="h-screen flex">
 
-          <a href="profile.html" class="hover:text-blue-600 transition hover:scale-110">
-            <i class="fa-solid fa-user"></i>
-          </a>
 
-          <button class="hover:text-blue-600 transition hover:scale-110">
-            <i class="fa-solid fa-gear"></i>
-          </button>
-        </nav>
-      </div>
+<!-- SIDEBAR -->
+<aside 
+class="w-16 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 flex flex-col items-center justify-between py-4">
 
-      <button onclick="logout()" class="text-red-500 hover:text-red-600 transition hover:scale-110">
-        <i class="fa-solid fa-right-from-bracket"></i>
-      </button>
-    </aside>
 
-    <section class="w-80 bg-white border-r border-slate-200 flex flex-col">
-      <div class="p-4 border-b border-slate-200">
-        <div class="flex items-center justify-between mb-4">
-          <h1 class="text-xl font-bold text-blue-600">Kadea Chat</h1>
+<div class="space-y-6">
 
-          <button id="openNewConversationModal"
-            class="w-9 h-9 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition hover:scale-110">
-            <i class="fa-solid fa-plus"></i>
-          </button>
-        </div>
 
-        <div class="relative">
-          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-          <input id="searchConversation" type="text" placeholder="Search conversations..."
-            class="w-full bg-slate-100 rounded-lg pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-      </div>
+<div class="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center">
+<i class="fa-solid fa-comments"></i>
+</div>
 
-      <div id="conversationsList" class="flex-1 overflow-y-auto">
-        <p class="p-4 text-sm text-slate-500">Chargement des conversations...</p>
-      </div>
-    </section>
 
-    <section class="flex-1 flex flex-col bg-slate-50">
-      <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div id="chatAvatar"
-            class="w-10 h-10 rounded-full bg-blue-100 overflow-hidden flex items-center justify-center font-bold text-blue-700">
-            KC
-          </div>
+<button 
+id="themeToggle"
+class="w-10 h-10 rounded-full flex items-center justify-center text-slate-500 hover:text-blue-600 transition hover:scale-110">
 
-          <div>
-            <h2 id="chatName" class="font-semibold text-slate-900">Sélectionne une conversation</h2>
-            <p class="text-xs text-green-600">● Online</p>
-          </div>
-        </div>
+<i id="themeIcon" class="fa-solid fa-moon"></i>
 
-        <div class="relative flex items-center gap-3 text-slate-500">
-          <button id="videoCallBtn" class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-slate-100 hover:text-blue-600 hover:scale-110">
-            <i class="fa-solid fa-video"></i>
-          </button>
+</button>
 
-          <button id="audioCallBtn" class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-slate-100 hover:text-green-600 hover:scale-110">
-            <i class="fa-solid fa-phone"></i>
-          </button>
 
-          <button id="chatMenuBtn" class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-slate-100 hover:text-slate-900 hover:scale-110">
-            <i class="fa-solid fa-ellipsis-vertical"></i>
-          </button>
+<nav class="flex flex-col items-center gap-5 text-slate-500">
 
-          <div id="chatMenu" class="hidden absolute right-0 top-12 w-56 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden z-40">
-            <a href="profile.html" class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-100">
-              <i class="fa-solid fa-user text-blue-600"></i>
-              Voir mon profil
-            </a>
+<button class="text-blue-600">
+<i class="fa-solid fa-message"></i>
+</button>
 
-            <button id="clearConversationBtn" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-100">
-              <i class="fa-solid fa-broom text-orange-500"></i>
-              Effacer la conversation
-            </button>
 
-            <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50">
-              <i class="fa-solid fa-right-from-bracket"></i>
-              Déconnexion
-            </button>
-          </div>
-        </div>
-      </header>
+<a href="profile.html" class="hover:text-blue-600">
+<i class="fa-solid fa-user"></i>
+</a>
 
-      <div id="messagesContainer" class="flex-1 p-6 overflow-y-auto space-y-5">
-        <div class="h-full flex items-center justify-center text-slate-400">
-          Clique sur une conversation pour afficher les messages.
-        </div>
-      </div>
 
-      <footer class="bg-white border-t border-slate-200 p-4">
-        <form id="messageForm" class="flex items-center gap-3">
-          <button type="button" id="emojiBtn" class="text-slate-400 hover:text-blue-600 transition hover:scale-110">
-            <i class="fa-regular fa-face-smile text-xl"></i>
-          </button>
+<button class="hover:text-blue-600">
+<i class="fa-solid fa-gear"></i>
+</button>
 
-          <input id="messageInput" type="text" placeholder="Type a message..."
-            class="flex-1 bg-slate-100 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" />
+</nav>
 
-          <button type="submit" class="w-11 h-11 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition hover:scale-110">
-            <i class="fa-solid fa-paper-plane"></i>
-          </button>
-        </form>
-      </footer>
-    </section>
-  </main>
+</div>
 
-  <div id="newConversationModal" class="hidden fixed inset-0 bg-black/40 items-center justify-center z-50">
-    <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-bold text-slate-900">Nouvelle conversation</h2>
-        <button id="closeNewConversationModal" class="text-slate-500 hover:text-red-500 transition">
-          <i class="fa-solid fa-xmark text-xl"></i>
-        </button>
-      </div>
 
-      <p class="text-sm text-slate-500 mb-4">
-        Choisis un utilisateur pour démarrer une discussion privée.
-      </p>
+<button onclick="logout()" class="text-red-500">
+<i class="fa-solid fa-right-from-bracket"></i>
+</button>
 
-      <div id="usersList" class="space-y-2 max-h-80 overflow-y-auto">
-        <p class="text-sm text-slate-500">Chargement des utilisateurs...</p>
-      </div>
-    </div>
-  </div>
 
-  <div id="uiModal" class="hidden fixed inset-0 bg-black/40 items-center justify-center z-50">
-    <div class="bg-white rounded-xl shadow-lg w-full max-w-sm p-6 text-center">
-      <div id="uiModalIcon" class="text-4xl mb-3"></div>
-      <h2 id="uiModalTitle" class="text-xl font-bold text-slate-900 mb-2"></h2>
-      <p id="uiModalText" class="text-sm text-slate-500 mb-5"></p>
+</aside>
 
-      <button id="closeUiModal" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition">
-        Fermer
-      </button>
-    </div>
-  </div>
 
-  <div id="conversationAvatarModal" class="hidden fixed inset-0 bg-black/90 items-center justify-center z-50 p-6">
-    <div class="relative w-full h-full flex flex-col items-center justify-center">
-      <button id="closeConversationAvatarModal"
-        class="absolute top-4 right-6 text-white text-4xl hover:scale-110 transition">
-        ×
-      </button>
 
-      <h2 id="conversationAvatarName" class="text-white text-2xl font-bold mb-6"></h2>
 
-      <div id="conversationBigAvatar"
-        class="max-w-[90vw] max-h-[80vh] overflow-hidden flex items-center justify-center text-7xl font-bold text-blue-600">
-      </div>
-    </div>
-  </div>
 
-  <script src="js/api.js"></script>
-  <script src="js/main.js"></script>
-  <script src="js/conversations.js"></script>
-  <script src="js/messages.js"></script>
+<!-- LISTE CONVERSATIONS -->
+<section class="w-80 bg-white border-r border-slate-200 flex flex-col">
+
+
+<div class="p-4 border-b border-slate-200">
+
+
+<div class="flex items-center justify-between mb-4">
+
+
+<div>
+
+<h1 class="text-xl font-bold text-blue-600">
+Kadea Chat
+</h1>
+
+
+<div class="flex items-center gap-2 mt-1">
+
+<span class="w-2 h-2 bg-green-500 rounded-full"></span>
+
+<p 
+id="connectedUserName"
+class="text-xs text-slate-600 font-semibold">
+</p>
+
+</div>
+
+
+</div>
+
+
+
+<button 
+id="openNewConversationModal"
+class="w-9 h-9 bg-blue-600 text-white rounded-full hover:bg-blue-700">
+
+<i class="fa-solid fa-plus"></i>
+
+</button>
+
+
+</div>
+
+
+
+<div class="relative">
+
+<i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+
+
+<input 
+id="searchConversation"
+type="text"
+placeholder="Search conversations..."
+class="w-full bg-slate-100 rounded-lg pl-10 pr-4 py-3 outline-none"
+/>
+
+
+</div>
+
+
+</div>
+
+
+
+<div 
+id="conversationsList"
+class="flex-1 overflow-y-auto">
+
+<p class="p-4 text-sm text-slate-500">
+Chargement des conversations...
+</p>
+
+</div>
+
+
+</section>
+
+
+
+
+
+<!-- ZONE CHAT -->
+<section class="flex-1 flex flex-col bg-slate-50">
+
+
+<header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between">
+
+
+<div class="flex items-center gap-3">
+
+
+<div 
+id="chatAvatar"
+class="w-10 h-10 rounded-full bg-blue-100 overflow-hidden flex items-center justify-center font-bold text-blue-700">
+
+KC
+
+</div>
+
+
+<div>
+
+<h2 
+id="chatName"
+class="font-semibold text-slate-900">
+
+Sélectionne une conversation
+
+</h2>
+
+
+<p class="text-xs text-green-600">
+● Online
+</p>
+
+
+</div>
+
+
+</div>
+<!-- ACTIONS HEADER -->
+<div class="relative flex items-center gap-3 text-slate-500">
+
+<button 
+id="videoCallBtn"
+class="w-10 h-10 rounded-full hover:bg-slate-100 hover:text-blue-600 transition">
+
+<i class="fa-solid fa-video"></i>
+
+</button>
+
+
+<button 
+id="audioCallBtn"
+class="w-10 h-10 rounded-full hover:bg-slate-100 hover:text-green-600 transition">
+
+<i class="fa-solid fa-phone"></i>
+
+</button>
+
+
+<button 
+id="chatMenuBtn"
+class="w-10 h-10 rounded-full hover:bg-slate-100 hover:text-black transition">
+
+<i class="fa-solid fa-ellipsis-vertical"></i>
+
+</button>
+
+
+
+<div 
+id="chatMenu"
+class="hidden absolute right-0 top-12 w-56 bg-white border rounded-xl shadow-lg z-40">
+
+
+<a 
+href="profile.html"
+class="flex gap-3 px-4 py-3 hover:bg-slate-100">
+
+<i class="fa-solid fa-user text-blue-600"></i>
+
+Voir mon profil
+
+</a>
+
+
+
+<button 
+id="clearConversationBtn"
+class="w-full flex gap-3 px-4 py-3 hover:bg-slate-100">
+
+<i class="fa-solid fa-broom text-orange-500"></i>
+
+Effacer la conversation
+
+</button>
+
+
+
+<button 
+onclick="logout()"
+class="w-full flex gap-3 px-4 py-3 text-red-600 hover:bg-red-50">
+
+<i class="fa-solid fa-right-from-bracket"></i>
+
+Déconnexion
+
+</button>
+
+
+</div>
+
+
+</div>
+
+
+</header>
+
+
+
+
+<!-- MESSAGES -->
+<div 
+id="messagesContainer"
+class="flex-1 p-6 overflow-y-auto space-y-3 bg-slate-100">
+
+<div class="h-full flex items-center justify-center text-slate-400">
+
+Clique sur une conversation pour afficher les messages.
+
+</div>
+
+
+</div>
+
+
+
+
+
+<!-- INPUT MESSAGE -->
+<footer class="bg-white border-t border-slate-200 p-4">
+
+
+<form 
+id="messageForm"
+class="flex items-center gap-3">
+
+
+<button 
+type="button"
+class="text-slate-400 hover:text-blue-600">
+
+<i class="fa-regular fa-face-smile text-xl"></i>
+
+</button>
+
+
+
+<input 
+id="messageInput"
+type="text"
+placeholder="Écrire un message..."
+class="flex-1 bg-slate-100 rounded-lg px-4 py-3 outline-none"
+/>
+
+
+
+<button 
+type="submit"
+class="w-11 h-11 bg-blue-600 text-white rounded-full hover:bg-blue-700">
+
+<i class="fa-solid fa-paper-plane"></i>
+
+</button>
+
+
+
+</form>
+
+
+</footer>
+
+
+</section>
+
+
+</main>
+
+
+
+
+
+
+
+<!-- MODAL NOUVELLE CONVERSATION -->
+
+<div 
+id="newConversationModal"
+class="hidden fixed inset-0 bg-black/40 items-center justify-center z-50">
+
+
+<div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
+
+
+<div class="flex justify-between mb-4">
+
+
+<h2 class="text-xl font-bold">
+Nouvelle conversation
+</h2>
+
+
+<button id="closeNewConversationModal">
+
+<i class="fa-solid fa-xmark"></i>
+
+</button>
+
+
+</div>
+
+
+
+<div 
+id="usersList"
+class="space-y-2 max-h-80 overflow-y-auto">
+
+
+Chargement des utilisateurs...
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+<!-- MODAL APPELS -->
+
+<div 
+id="uiModal"
+class="hidden fixed inset-0 bg-black/40 items-center justify-center z-50">
+
+
+<div class="bg-white rounded-xl shadow-lg w-full max-w-sm p-6 text-center">
+
+
+<div 
+id="uiModalIcon"
+class="text-4xl mb-3">
+</div>
+
+
+<h2 
+id="uiModalTitle"
+class="text-xl font-bold mb-2">
+</h2>
+
+
+<p 
+id="uiModalText"
+class="text-sm text-slate-500 mb-5">
+</p>
+
+
+
+<button 
+id="closeUiModal"
+class="bg-blue-600 text-white px-6 py-2 rounded-lg">
+
+Fermer
+
+</button>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+<!-- MODAL PHOTO CONVERSATION -->
+
+<div 
+id="conversationAvatarModal"
+class="hidden fixed inset-0 bg-black/90 items-center justify-center z-50">
+
+
+<button 
+id="closeConversationAvatarModal"
+class="absolute top-5 right-8 text-white text-4xl">
+
+×
+
+</button>
+
+
+<div class="text-center">
+
+
+<h2 
+id="conversationAvatarName"
+class="text-white text-2xl font-bold mb-6">
+
+</h2>
+
+
+<div 
+id="conversationBigAvatar">
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+<script src="js/api.js"></script>
+
+<script src="js/main.js"></script>
+
+<script src="js/conversations.js"></script>
+
+<script src="js/messages.js"></script>
+
+
 </body>
+
 </html>

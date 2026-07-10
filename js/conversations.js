@@ -29,7 +29,6 @@ function getCurrentUser() {
 
 function getInitials(name) {
   if (!name) return "KC";
-
   return name
     .split(" ")
     .map((word) => word[0])
@@ -98,15 +97,16 @@ function openConversationAvatar(avatarUrl, initials, name) {
   conversationAvatarModal.classList.add("flex");
 }
 
-closeConversationAvatarModal?.addEventListener("click", () => {
+function closeConversationAvatar() {
   conversationAvatarModal.classList.add("hidden");
   conversationAvatarModal.classList.remove("flex");
-});
+}
+
+closeConversationAvatarModal?.addEventListener("click", closeConversationAvatar);
 
 conversationAvatarModal?.addEventListener("click", (event) => {
   if (event.target === conversationAvatarModal) {
-    conversationAvatarModal.classList.add("hidden");
-    conversationAvatarModal.classList.remove("flex");
+    closeConversationAvatar();
   }
 });
 
@@ -188,6 +188,12 @@ function renderConversations(list) {
 
 async function loadConversations() {
   try {
+    conversationsList.innerHTML = `
+      <p class="p-4 text-sm text-slate-500">
+        Chargement des conversations...
+      </p>
+    `;
+
     const response = await fetch(`${API_URL}/conversations`, {
       method: "GET",
       headers: getAuthHeaders(),
@@ -196,18 +202,168 @@ async function loadConversations() {
 
     const result = await response.json();
 
+    if (!response.ok || !result.success) {
+      conversationsList.innerHTML = `
+        <p class="p-4 text-sm text-red-500">
+          ${result.message || "Impossible de charger les conversations."}
+        </p>
+      `;
+      return;
+    }
+
     conversations = result.data?.conversations || [];
     renderConversations(conversations);
   } catch (error) {
     conversationsList.innerHTML = `
-      <p class="p-4 text-red-500">
-        Erreur chargement conversations
+      <p class="p-4 text-sm text-red-500">
+        Erreur chargement conversations.
       </p>
     `;
   }
 }
 
 window.loadConversations = loadConversations;
+
+async function loadUsers() {
+  try {
+    usersList.innerHTML = `
+      <p class="text-sm text-slate-500">Chargement des utilisateurs...</p>
+    `;
+
+    const response = await fetch(`${API_URL}/users`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+      cache: "no-store",
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      usersList.innerHTML = `
+        <p class="text-sm text-red-500">
+          ${result.message || "Impossible de charger les utilisateurs."}
+        </p>
+      `;
+      return;
+    }
+
+    const users = result.data?.users || [];
+    renderUsers(users);
+  } catch (error) {
+    usersList.innerHTML = `
+      <p class="text-sm text-red-500">
+        Erreur réseau. Impossible de charger les utilisateurs.
+      </p>
+    `;
+  }
+}
+
+function renderUsers(users) {
+  usersList.innerHTML = "";
+
+  if (!users.length) {
+    usersList.innerHTML = `
+      <p class="text-sm text-slate-500">Aucun utilisateur trouvé.</p>
+    `;
+    return;
+  }
+
+  const currentUser = getCurrentUser();
+
+  users.forEach((user) => {
+    if (currentUser && user.id === currentUser.id) return;
+
+    const name = user.fullName || "Utilisateur";
+    const email = user.email || "";
+    const initials = getInitials(name);
+
+    const button = document.createElement("button");
+    button.className =
+      "w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 transition text-left";
+
+    button.innerHTML = `
+      <div class="w-10 h-10 rounded-full bg-blue-100 overflow-hidden flex items-center justify-center font-bold text-blue-700">
+        ${
+          user.avatarUrl
+            ? `<img src="${user.avatarUrl}" alt="${name}" class="w-full h-full object-cover">`
+            : initials
+        }
+      </div>
+
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-slate-900 truncate">${name}</p>
+        <p class="text-sm text-slate-500 truncate">${email}</p>
+      </div>
+    `;
+
+    button.addEventListener("click", () => {
+      createPrivateConversation(user.id, name);
+    });
+
+    usersList.appendChild(button);
+  });
+}
+
+async function createPrivateConversation(userId, userName) {
+  try {
+    usersList.innerHTML = `
+      <p class="text-sm text-green-600">
+        Création de la conversation...
+      </p>
+    `;
+
+    const response = await fetch(`${API_URL}/conversations`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      cache: "no-store",
+      body: JSON.stringify({
+        type: "private",
+        name: userName,
+        participantIds: [userId],
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      usersList.innerHTML = `
+        <p class="text-sm text-red-500">
+          ${result.message || "Impossible de créer la conversation."}
+        </p>
+      `;
+      return;
+    }
+
+    closeModal();
+    await loadConversations();
+  } catch (error) {
+    usersList.innerHTML = `
+      <p class="text-sm text-red-500">
+        Erreur réseau. Impossible de créer la conversation.
+      </p>
+    `;
+  }
+}
+
+function openModal() {
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+  loadUsers();
+}
+
+function closeModal() {
+  modal.classList.add("hidden");
+  modal.classList.remove("flex");
+}
+
+openModalBtn?.addEventListener("click", openModal);
+closeModalBtn?.addEventListener("click", closeModal);
+
+modal?.addEventListener("click", (event) => {
+  if (event.target === modal) {
+    closeModal();
+  }
+});
 
 searchConversation?.addEventListener("input", () => {
   const value = searchConversation.value.toLowerCase();

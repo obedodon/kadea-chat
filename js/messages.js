@@ -14,29 +14,31 @@ function getCurrentUser() {
   }
 }
 
-function formatMessageDate(date) {
+function formatMessageTime(date) {
   if (!date) return "";
 
-  const messageDate = new Date(date);
-  const today = new Date();
-
-  const isToday = messageDate.toDateString() === today.toDateString();
-
-  const yesterday = new Date();
-  yesterday.setDate(today.getDate() - 1);
-
-  const isYesterday = messageDate.toDateString() === yesterday.toDateString();
-
-  const time = messageDate.toLocaleTimeString("fr-FR", {
+  return new Date(date).toLocaleTimeString("fr-FR", {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
 
-  if (isToday) return `Aujourd'hui à ${time}`;
-  if (isYesterday) return `Hier à ${time}`;
+function formatMessageDate(date) {
+  const messageDate = new Date(date);
+  const today = new Date();
+  const yesterday = new Date();
 
-  const fullDate = messageDate.toLocaleDateString("fr-FR");
-  return `${fullDate} à ${time}`;
+  yesterday.setDate(today.getDate() - 1);
+
+  if (messageDate.toDateString() === today.toDateString()) {
+    return "Aujourd'hui";
+  }
+
+  if (messageDate.toDateString() === yesterday.toDateString()) {
+    return "Hier";
+  }
+
+  return messageDate.toLocaleDateString("fr-FR");
 }
 
 function extractMessages(result) {
@@ -52,7 +54,6 @@ function getMessageSenderId(message) {
 
 function renderMessages(messages) {
   const currentUser = getCurrentUser();
-
   messagesContainer.innerHTML = "";
 
   if (!messages.length) {
@@ -64,24 +65,55 @@ function renderMessages(messages) {
     return;
   }
 
+  let lastDate = "";
+
   messages.forEach((message) => {
+    const messageDate = formatMessageDate(message.createdAt);
+
+    if (messageDate !== lastDate) {
+      const dateSeparator = document.createElement("div");
+      dateSeparator.className = "flex justify-center my-4";
+      dateSeparator.innerHTML = `
+        <span class="bg-slate-200 text-slate-600 text-xs px-4 py-1 rounded-full shadow-sm">
+          ${messageDate}
+        </span>
+      `;
+      messagesContainer.appendChild(dateSeparator);
+      lastDate = messageDate;
+    }
+
     const senderId = getMessageSenderId(message);
     const isMine = currentUser && senderId === currentUser.id;
 
-    const div = document.createElement("div");
+    const wrapper = document.createElement("div");
+    wrapper.className = isMine ? "flex justify-end" : "flex justify-start";
 
-    div.className = isMine
-      ? "max-w-md ml-auto bg-blue-600 text-white rounded-xl rounded-tr-none p-4 shadow-sm"
-      : "max-w-md bg-white border border-slate-200 text-slate-700 rounded-xl rounded-tl-none p-4 shadow-sm";
+    wrapper.innerHTML = `
+      <div class="${
+        isMine
+          ? "bg-green-200 text-slate-900 rounded-lg rounded-tr-none"
+          : "bg-white text-slate-900 rounded-lg rounded-tl-none"
+      } max-w-[70%] px-4 py-2 shadow-sm">
 
-    div.innerHTML = `
-      <p class="leading-relaxed">${message.content}</p>
-      <span class="block text-xs mt-2 ${isMine ? "text-blue-100" : "text-slate-400"}">
-        ${formatMessageDate(message.createdAt)}
-      </span>
+        <p class="text-sm leading-relaxed break-words">
+          ${message.content}
+        </p>
+
+        <div class="flex justify-end items-center gap-1 mt-1">
+          <span class="text-[11px] text-slate-500">
+            ${formatMessageTime(message.createdAt)}
+          </span>
+
+          ${
+            isMine
+              ? `<i class="fa-solid fa-check-double text-[11px] text-blue-500"></i>`
+              : ""
+          }
+        </div>
+      </div>
     `;
 
-    messagesContainer.appendChild(div);
+    messagesContainer.appendChild(wrapper);
   });
 
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -104,7 +136,6 @@ async function loadMessages(conversationId) {
     });
 
     const result = await response.json();
-    console.log("Réponse messages :", result);
 
     if (!response.ok || !result.success) {
       messagesContainer.innerHTML = `
@@ -148,7 +179,6 @@ messageForm?.addEventListener("submit", async (event) => {
     });
 
     const result = await response.json();
-    console.log("Message envoyé :", result);
 
     if (!response.ok || !result.success) {
       alert(result.message || "Impossible d'envoyer le message.");
