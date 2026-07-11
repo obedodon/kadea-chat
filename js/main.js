@@ -1,5 +1,5 @@
 /* ==================================================
-   PROTECTION DES PAGES
+   PROTECTION DE LA PAGE
 ================================================== */
 
 function protectPage() {
@@ -13,13 +13,10 @@ function protectPage() {
 function logout() {
   localStorage.removeItem("token");
   localStorage.removeItem("user");
-
   window.location.href = "login.html";
 }
 
 protectPage();
-
-
 
 /* ==================================================
    UTILISATEUR CONNECTÉ
@@ -27,245 +24,296 @@ protectPage();
 
 function getConnectedUser() {
   try {
-    const user = localStorage.getItem("user");
+    const storedUser = localStorage.getItem("user");
 
-    if (!user || user === "undefined") {
+    if (!storedUser || storedUser === "undefined") {
       return null;
     }
 
-    return JSON.parse(user);
-
+    return JSON.parse(storedUser);
   } catch (error) {
-
     console.error("Erreur utilisateur :", error);
     return null;
   }
 }
 
-
 function displayConnectedUser() {
-
-  const connectedUserName =
+  const connectedUserNameElement =
     document.getElementById("connectedUserName");
-
 
   const user = getConnectedUser();
 
-
-  if (!connectedUserName || !user) {
+  if (!connectedUserNameElement) {
     return;
   }
 
-
-  connectedUserName.textContent =
-    user.fullName ||
-    user.name ||
-    user.username ||
+  connectedUserNameElement.textContent =
+    user?.fullName ||
+    user?.name ||
+    user?.username ||
     "Utilisateur";
-
 }
-
 
 displayConnectedUser();
 
-
-
-
 /* ==================================================
-   BOUTONS APPEL + MENU
+   ÉLÉMENTS DE L’INTERFACE
 ================================================== */
 
-const videoCallBtn =
+const videoCallButton =
   document.getElementById("videoCallBtn");
 
-const audioCallBtn =
+const audioCallButton =
   document.getElementById("audioCallBtn");
 
-const chatMenuBtn =
+const chatMenuButton =
   document.getElementById("chatMenuBtn");
 
-const chatMenu =
+const chatMenuElement =
   document.getElementById("chatMenu");
 
-const clearConversationBtn =
+const clearConversationButton =
   document.getElementById("clearConversationBtn");
 
-
-
-/* ==================================================
-   MODAL SIMPLE
-================================================== */
-
-const uiModal =
+const interfaceModal =
   document.getElementById("uiModal");
 
-const uiModalIcon =
+const interfaceModalIcon =
   document.getElementById("uiModalIcon");
 
-const uiModalTitle =
+const interfaceModalTitle =
   document.getElementById("uiModalTitle");
 
-const uiModalText =
+const interfaceModalText =
   document.getElementById("uiModalText");
 
-const closeUiModal =
+const closeInterfaceModalButton =
   document.getElementById("closeUiModal");
 
-
+/* ==================================================
+   MODALE SIMPLE
+================================================== */
 
 function openUiModal(icon, title, text) {
+  if (!interfaceModal) {
+    return;
+  }
 
-  if (!uiModal) return;
+  if (interfaceModalIcon) {
+    interfaceModalIcon.textContent = icon;
+  }
 
+  if (interfaceModalTitle) {
+    interfaceModalTitle.textContent = title;
+  }
 
-  uiModalIcon.textContent = icon;
+  if (interfaceModalText) {
+    interfaceModalText.textContent = text;
+  }
 
-  uiModalTitle.textContent = title;
-
-  uiModalText.textContent = text;
-
-
-  uiModal.classList.remove("hidden");
-
-  uiModal.classList.add("flex");
+  interfaceModal.classList.remove("hidden");
+  interfaceModal.classList.add("flex");
 }
-
-
 
 function closeUiModalBox() {
+  if (!interfaceModal) {
+    return;
+  }
 
-  if (!uiModal) return;
-
-
-  uiModal.classList.add("hidden");
-
-  uiModal.classList.remove("flex");
-
+  interfaceModal.classList.add("hidden");
+  interfaceModal.classList.remove("flex");
 }
 
-
-
-/* ==================================================
-   APPEL VIDÉO
-================================================== */
-
-videoCallBtn?.addEventListener(
-  "click",
-  () => {
-
-    openUiModal(
-      "📹",
-      "Appel vidéo",
-      "Cette fonctionnalité sera disponible prochainement."
-    );
-
-  }
-);
-
-
-
-/* ==================================================
-   APPEL AUDIO
-================================================== */
-
-audioCallBtn?.addEventListener(
-  "click",
-  () => {
-
-    openUiModal(
-      "📞",
-      "Appel audio",
-      "Cette fonctionnalité sera disponible prochainement."
-    );
-
-  }
-);
-
-
-
-
-/* ==================================================
-   FERMETURE MODAL
-================================================== */
-
-closeUiModal?.addEventListener(
+closeInterfaceModalButton?.addEventListener(
   "click",
   closeUiModalBox
 );
 
-
-
-uiModal?.addEventListener(
-  "click",
-  (event) => {
-
-    if (event.target === uiModal) {
-
-      closeUiModalBox();
-
-    }
-
+interfaceModal?.addEventListener("click", (event) => {
+  if (event.target === interfaceModal) {
+    closeUiModalBox();
   }
-);
+});
 
-
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    closeUiModalBox();
+    chatMenuElement?.classList.add("hidden");
+  }
+});
 
 /* ==================================================
-   MENU 3 POINTS
+   APPELS
 ================================================== */
 
+videoCallButton?.addEventListener("click", () => {
+  openUiModal(
+    "📹",
+    "Appel vidéo",
+    "Cette fonctionnalité sera disponible prochainement."
+  );
+});
 
-chatMenuBtn?.addEventListener(
-  "click",
-  (event) => {
-
-    event.stopPropagation();
-
-    chatMenu?.classList.toggle("hidden");
-
-  }
-);
-
-
-
-
-document.addEventListener(
-  "click",
-  (event) => {
-
-    if (
-      chatMenu &&
-      !chatMenu.classList.contains("hidden") &&
-      !chatMenu.contains(event.target)
-    ) {
-
-      chatMenu.classList.add("hidden");
-
-    }
-
-  }
-);
-
-
-
+audioCallButton?.addEventListener("click", () => {
+  openUiModal(
+    "📞",
+    "Appel audio",
+    "Cette fonctionnalité sera disponible prochainement."
+  );
+});
 
 /* ==================================================
-   EFFACER CONVERSATION
+   MENU TROIS POINTS
 ================================================== */
 
+chatMenuButton?.addEventListener("click", (event) => {
+  event.stopPropagation();
+  chatMenuElement?.classList.toggle("hidden");
+});
 
-clearConversationBtn?.addEventListener(
-  "click",
-  () => {
+chatMenuElement?.addEventListener("click", (event) => {
+  event.stopPropagation();
+});
 
-    chatMenu?.classList.add("hidden");
+document.addEventListener("click", () => {
+  chatMenuElement?.classList.add("hidden");
+});
 
+/* ==================================================
+   REMISE À ZÉRO APRÈS SUPPRESSION
+================================================== */
 
+function resetChatInterface() {
+  const chatNameElement =
+    document.getElementById("chatName");
+
+  const chatAvatarElement =
+    document.getElementById("chatAvatar");
+
+  const messagesAreaElement =
+    document.getElementById("messagesContainer");
+
+  const messageFieldElement =
+    document.getElementById("messageInput");
+
+  if (chatNameElement) {
+    chatNameElement.textContent =
+      "Sélectionne une conversation";
+  }
+
+  if (chatAvatarElement) {
+    chatAvatarElement.innerHTML = "";
+    chatAvatarElement.textContent = "KC";
+  }
+
+  if (messagesAreaElement) {
+    messagesAreaElement.innerHTML = `
+      <div class="h-full flex items-center justify-center text-slate-400">
+        Clique sur une conversation pour afficher les messages.
+      </div>
+    `;
+  }
+
+  if (messageFieldElement) {
+    messageFieldElement.value = "";
+  }
+
+  window.activeConversationId = null;
+
+  if (
+    typeof window.clearSelectedConversation === "function"
+  ) {
+    window.clearSelectedConversation();
+  }
+}
+
+/* ==================================================
+   SUPPRESSION D’UNE CONVERSATION
+================================================== */
+
+async function deleteSelectedConversation() {
+  const conversationId =
+    window.activeConversationId;
+
+  if (!conversationId) {
     openUiModal(
-      "🧹",
-      "Effacer la conversation",
-      "Cette fonctionnalité sera connectée à l'API plus tard."
+      "⚠️",
+      "Aucune conversation sélectionnée",
+      "Sélectionne d’abord une conversation."
     );
 
+    return;
+  }
+
+  const confirmation = window.confirm(
+    "Veux-tu vraiment supprimer cette conversation ?"
+  );
+
+  if (!confirmation) {
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `${API_URL}/conversations/${conversationId}`,
+      {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+        cache: "no-store",
+      }
+    );
+
+    const responseText = await response.text();
+
+    let result = null;
+
+    if (responseText) {
+      try {
+        result = JSON.parse(responseText);
+      } catch {
+        result = null;
+      }
+    }
+
+    if (!response.ok) {
+      openUiModal(
+        "❌",
+        "Suppression impossible",
+        result?.message ||
+          "Impossible de supprimer cette conversation."
+      );
+
+      return;
+    }
+
+    resetChatInterface();
+
+    if (
+      typeof window.loadConversations === "function"
+    ) {
+      await window.loadConversations();
+    }
+
+    openUiModal(
+      "✅",
+      "Conversation supprimée",
+      "La conversation a été supprimée."
+    );
+  } catch (error) {
+    console.error("Erreur suppression :", error);
+
+    openUiModal(
+      "❌",
+      "Erreur réseau",
+      "Impossible de supprimer la conversation."
+    );
+  }
+}
+
+clearConversationButton?.addEventListener(
+  "click",
+  async () => {
+    chatMenuElement?.classList.add("hidden");
+    await deleteSelectedConversation();
   }
 );

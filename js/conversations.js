@@ -22,6 +22,12 @@ const closeConversationAvatarModal = document.getElementById(
 let conversations = [];
 let activeConversationId = null;
 
+/*
+  Cette variable globale permet à main.js de connaître
+  la conversation actuellement sélectionnée.
+*/
+window.activeConversationId = null;
+
 /* =========================================================
    STYLES DES CONVERSATIONS ET MODE SOMBRE
 ========================================================= */
@@ -33,7 +39,9 @@ conversationStyles.textContent = `
     border-bottom: 1px solid #e2e8f0;
     background: #ffffff;
     color: #0f172a;
-    transition: background-color 0.2s, color 0.2s;
+    transition:
+      background-color 0.2s,
+      color 0.2s;
   }
 
   .conversation-item:hover {
@@ -121,7 +129,10 @@ function escapeHtml(value) {
 
 function safeJsonParse(value) {
   try {
-    if (!value || value === "undefined") return null;
+    if (!value || value === "undefined") {
+      return null;
+    }
+
     return JSON.parse(value);
   } catch {
     return null;
@@ -133,7 +144,9 @@ function getCurrentUser() {
 }
 
 function getInitials(name) {
-  if (!name) return "KC";
+  if (!name) {
+    return "KC";
+  }
 
   return name
     .trim()
@@ -164,10 +177,6 @@ function getOtherParticipant(conversation) {
   );
 }
 
-/*
-  Pour une discussion privée, on affiche uniquement
-  le nom de l’autre utilisateur.
-*/
 function getConversationName(conversation) {
   if (conversation.type === "private") {
     const otherParticipant = getOtherParticipant(conversation);
@@ -186,6 +195,7 @@ function getConversationName(conversation) {
 function getConversationAvatar(conversation) {
   if (conversation.type === "private") {
     const otherParticipant = getOtherParticipant(conversation);
+
     return otherParticipant?.user?.avatarUrl || null;
   }
 
@@ -201,7 +211,9 @@ function getLastMessageObject(conversation) {
     Array.isArray(conversation.messages) &&
     conversation.messages.length > 0
   ) {
-    return conversation.messages[conversation.messages.length - 1];
+    return conversation.messages[
+      conversation.messages.length - 1
+    ];
   }
 
   return null;
@@ -218,13 +230,6 @@ function getMessageSenderName(message) {
   );
 }
 
-/*
-  Dans une conversation privée, WhatsApp affiche seulement
-  le contenu du dernier message.
-
-  Dans un groupe, on ajoute le nom de celui qui a envoyé
-  le dernier message.
-*/
 function getLastMessagePreview(conversation) {
   const lastMessage = getLastMessageObject(conversation);
 
@@ -246,11 +251,15 @@ function getLastMessagePreview(conversation) {
 function getLastMessageTime(conversation) {
   const lastMessage = getLastMessageObject(conversation);
 
-  if (!lastMessage?.createdAt) return "";
+  if (!lastMessage?.createdAt) {
+    return "";
+  }
 
   const date = new Date(lastMessage.createdAt);
 
-  if (Number.isNaN(date.getTime())) return "";
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
 
   const today = new Date();
 
@@ -290,8 +299,17 @@ function sortConversationsByActivity(list) {
    PHOTO EN GRAND
 ========================================================= */
 
-function openConversationAvatar(avatarUrl, initials, name) {
-  if (!conversationAvatarModal || !conversationBigAvatar) return;
+function openConversationAvatar(
+  avatarUrl,
+  initials,
+  name
+) {
+  if (
+    !conversationAvatarModal ||
+    !conversationBigAvatar
+  ) {
+    return;
+  }
 
   if (conversationAvatarName) {
     conversationAvatarName.textContent = name;
@@ -331,17 +349,24 @@ closeConversationAvatarModal?.addEventListener(
   closeConversationAvatar
 );
 
-conversationAvatarModal?.addEventListener("click", (event) => {
-  if (event.target === conversationAvatarModal) {
-    closeConversationAvatar();
+conversationAvatarModal?.addEventListener(
+  "click",
+  (event) => {
+    if (event.target === conversationAvatarModal) {
+      closeConversationAvatar();
+    }
   }
-});
+);
 
 /* =========================================================
    AFFICHAGE DES CONVERSATIONS
 ========================================================= */
 
 function renderConversations(list) {
+  if (!conversationsList) {
+    return;
+  }
+
   conversationsList.innerHTML = "";
 
   if (!Array.isArray(list) || list.length === 0) {
@@ -350,34 +375,51 @@ function renderConversations(list) {
         Aucune conversation trouvée.
       </p>
     `;
+
     return;
   }
 
-  const sortedConversations = sortConversationsByActivity(list);
+  const sortedConversations =
+    sortConversationsByActivity(list);
 
   sortedConversations.forEach((conversation) => {
     const name = getConversationName(conversation);
-    const avatarUrl = getConversationAvatar(conversation);
+    const avatarUrl =
+      getConversationAvatar(conversation);
     const initials = getInitials(name);
-    const lastMessagePreview = getLastMessagePreview(conversation);
+    const lastMessagePreview =
+      getLastMessagePreview(conversation);
     const time = getLastMessageTime(conversation);
-    const isActive = activeConversationId === conversation.id;
+    const isActive =
+      activeConversationId === conversation.id;
 
-    const article = document.createElement("article");
+    const article =
+      document.createElement("article");
 
-    article.className = `conversation-item p-4 cursor-pointer ${
-      isActive ? "active" : ""
-    }`;
+    article.className = `
+      conversation-item
+      p-4
+      cursor-pointer
+      ${isActive ? "active" : ""}
+    `;
 
     article.innerHTML = `
       <div class="flex items-center gap-3">
+
         <button
           type="button"
-          class="conversation-avatar w-12 h-12 shrink-0 rounded-full
-                 bg-blue-100 overflow-hidden flex items-center
-                 justify-center font-bold text-blue-700
-                 transition-all duration-300 hover:scale-110
-                 hover:shadow-lg hover:ring-4 hover:ring-blue-200"
+          class="
+            conversation-avatar
+            w-12 h-12 shrink-0 rounded-full
+            bg-blue-100 overflow-hidden
+            flex items-center justify-center
+            font-bold text-blue-700
+            transition-all duration-300
+            hover:scale-110
+            hover:shadow-lg
+            hover:ring-4
+            hover:ring-blue-200
+          "
           aria-label="Voir la photo de ${escapeHtml(name)}"
         >
           ${
@@ -394,7 +436,9 @@ function renderConversations(list) {
         </button>
 
         <div class="flex-1 min-w-0">
+
           <div class="flex items-center justify-between gap-3">
+
             <h3 class="conversation-name font-semibold truncate">
               ${escapeHtml(name)}
             </h3>
@@ -402,27 +446,49 @@ function renderConversations(list) {
             <span class="conversation-time text-xs shrink-0">
               ${escapeHtml(time)}
             </span>
+
           </div>
 
           <p class="conversation-preview text-sm truncate mt-0.5">
             ${escapeHtml(lastMessagePreview)}
           </p>
+
         </div>
+
       </div>
     `;
 
-    const avatarButton = article.querySelector(".conversation-avatar");
+    const avatarButton =
+      article.querySelector(".conversation-avatar");
 
-    avatarButton?.addEventListener("click", (event) => {
-      event.stopPropagation();
-      openConversationAvatar(avatarUrl, initials, name);
-    });
+    avatarButton?.addEventListener(
+      "click",
+      (event) => {
+        event.stopPropagation();
+
+        openConversationAvatar(
+          avatarUrl,
+          initials,
+          name
+        );
+      }
+    );
 
     article.addEventListener("click", () => {
       activeConversationId = conversation.id;
 
-      const chatName = document.getElementById("chatName");
-      const chatAvatar = document.getElementById("chatAvatar");
+      /*
+        On expose aussi l'identifiant dans window
+        pour que main.js puisse supprimer la conversation.
+      */
+      window.activeConversationId =
+        conversation.id;
+
+      const chatName =
+        document.getElementById("chatName");
+
+      const chatAvatar =
+        document.getElementById("chatAvatar");
 
       if (chatName) {
         chatName.textContent = name;
@@ -444,7 +510,9 @@ function renderConversations(list) {
 
       renderConversations(conversations);
 
-      if (typeof window.loadMessages === "function") {
+      if (
+        typeof window.loadMessages === "function"
+      ) {
         window.loadMessages(conversation.id);
       }
     });
@@ -458,6 +526,10 @@ function renderConversations(list) {
 ========================================================= */
 
 async function loadConversations() {
+  if (!conversationsList) {
+    return;
+  }
+
   conversationsList.innerHTML = `
     <p class="p-4 text-sm text-slate-500">
       Chargement des conversations...
@@ -465,11 +537,14 @@ async function loadConversations() {
   `;
 
   try {
-    const response = await fetch(`${API_URL}/conversations`, {
-      method: "GET",
-      headers: getAuthHeaders(),
-      cache: "no-store",
-    });
+    const response = await fetch(
+      `${API_URL}/conversations`,
+      {
+        method: "GET",
+        headers: getAuthHeaders(),
+        cache: "no-store",
+      }
+    );
 
     const result = await response.json();
 
@@ -482,13 +557,33 @@ async function loadConversations() {
           )}
         </p>
       `;
+
       return;
     }
 
-    conversations = result.data?.conversations || [];
+    conversations =
+      result.data?.conversations || [];
+
+    /*
+      Si la conversation sélectionnée a été supprimée,
+      on oublie sa sélection.
+    */
+    const stillExists = conversations.some(
+      (conversation) =>
+        conversation.id === activeConversationId
+    );
+
+    if (!stillExists) {
+      activeConversationId = null;
+      window.activeConversationId = null;
+    }
+
     renderConversations(conversations);
   } catch (error) {
-    console.error("Erreur conversations :", error);
+    console.error(
+      "Erreur conversations :",
+      error
+    );
 
     conversationsList.innerHTML = `
       <p class="p-4 text-sm text-red-500">
@@ -498,13 +593,29 @@ async function loadConversations() {
   }
 }
 
-window.loadConversations = loadConversations;
+window.loadConversations =
+  loadConversations;
+
+/* =========================================================
+   EFFACER LA SÉLECTION ACTIVE
+========================================================= */
+
+window.clearSelectedConversation = function () {
+  activeConversationId = null;
+  window.activeConversationId = null;
+
+  renderConversations(conversations);
+};
 
 /* =========================================================
    NOUVELLE CONVERSATION
 ========================================================= */
 
 async function loadUsers() {
+  if (!usersList) {
+    return;
+  }
+
   usersList.innerHTML = `
     <p class="text-sm text-slate-500">
       Chargement des utilisateurs...
@@ -512,11 +623,14 @@ async function loadUsers() {
   `;
 
   try {
-    const response = await fetch(`${API_URL}/users`, {
-      method: "GET",
-      headers: getAuthHeaders(),
-      cache: "no-store",
-    });
+    const response = await fetch(
+      `${API_URL}/users`,
+      {
+        method: "GET",
+        headers: getAuthHeaders(),
+        cache: "no-store",
+      }
+    );
 
     const result = await response.json();
 
@@ -529,12 +643,16 @@ async function loadUsers() {
           )}
         </p>
       `;
+
       return;
     }
 
     renderUsers(result.data?.users || []);
   } catch (error) {
-    console.error("Erreur utilisateurs :", error);
+    console.error(
+      "Erreur utilisateurs :",
+      error
+    );
 
     usersList.innerHTML = `
       <p class="text-sm text-red-500">
@@ -545,6 +663,10 @@ async function loadUsers() {
 }
 
 function renderUsers(users) {
+  if (!usersList) {
+    return;
+  }
+
   usersList.innerHTML = "";
 
   const currentUser = getCurrentUser();
@@ -559,25 +681,43 @@ function renderUsers(users) {
         Aucun autre utilisateur trouvé.
       </p>
     `;
+
     return;
   }
 
   availableUsers.forEach((user) => {
-    const name = user.fullName || user.name || "Utilisateur";
+    const name =
+      user.fullName ||
+      user.name ||
+      "Utilisateur";
+
     const email = user.email || "";
     const initials = getInitials(name);
 
-    const button = document.createElement("button");
+    const button =
+      document.createElement("button");
 
     button.type = "button";
-    button.className =
-      "user-choice w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 transition text-left";
+
+    button.className = `
+      user-choice
+      w-full
+      flex items-center gap-3
+      p-3
+      rounded-lg
+      hover:bg-blue-50
+      transition
+      text-left
+    `;
 
     button.innerHTML = `
       <div
-        class="w-10 h-10 shrink-0 rounded-full bg-blue-100
-               overflow-hidden flex items-center justify-center
-               font-bold text-blue-700"
+        class="
+          w-10 h-10 shrink-0 rounded-full
+          bg-blue-100 overflow-hidden
+          flex items-center justify-center
+          font-bold text-blue-700
+        "
       >
         ${
           user.avatarUrl
@@ -593,6 +733,7 @@ function renderUsers(users) {
       </div>
 
       <div class="flex-1 min-w-0">
+
         <p class="font-semibold truncate">
           ${escapeHtml(name)}
         </p>
@@ -600,18 +741,29 @@ function renderUsers(users) {
         <p class="user-choice-email text-sm text-slate-500 truncate">
           ${escapeHtml(email)}
         </p>
+
       </div>
     `;
 
     button.addEventListener("click", () => {
-      createPrivateConversation(user.id, name);
+      createPrivateConversation(
+        user.id,
+        name
+      );
     });
 
     usersList.appendChild(button);
   });
 }
 
-async function createPrivateConversation(userId, userName) {
+async function createPrivateConversation(
+  userId,
+  userName
+) {
+  if (!usersList) {
+    return;
+  }
+
   usersList.innerHTML = `
     <p class="text-sm text-green-600">
       Création de la conversation...
@@ -619,16 +771,19 @@ async function createPrivateConversation(userId, userName) {
   `;
 
   try {
-    const response = await fetch(`${API_URL}/conversations`, {
-      method: "POST",
-      headers: getAuthHeaders(),
-      cache: "no-store",
-      body: JSON.stringify({
-        type: "private",
-        name: userName,
-        participantIds: [userId],
-      }),
-    });
+    const response = await fetch(
+      `${API_URL}/conversations`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+        cache: "no-store",
+        body: JSON.stringify({
+          type: "private",
+          name: userName,
+          participantIds: [userId],
+        }),
+      }
+    );
 
     const result = await response.json();
 
@@ -641,13 +796,17 @@ async function createPrivateConversation(userId, userName) {
           )}
         </p>
       `;
+
       return;
     }
 
     closeModal();
     await loadConversations();
   } catch (error) {
-    console.error("Erreur création conversation :", error);
+    console.error(
+      "Erreur création conversation :",
+      error
+    );
 
     usersList.innerHTML = `
       <p class="text-sm text-red-500">
@@ -660,6 +819,7 @@ async function createPrivateConversation(userId, userName) {
 function openModal() {
   modal?.classList.remove("hidden");
   modal?.classList.add("flex");
+
   loadUsers();
 }
 
@@ -668,8 +828,15 @@ function closeModal() {
   modal?.classList.remove("flex");
 }
 
-openModalBtn?.addEventListener("click", openModal);
-closeModalBtn?.addEventListener("click", closeModal);
+openModalBtn?.addEventListener(
+  "click",
+  openModal
+);
+
+closeModalBtn?.addEventListener(
+  "click",
+  closeModal
+);
 
 modal?.addEventListener("click", (event) => {
   if (event.target === modal) {
@@ -681,20 +848,27 @@ modal?.addEventListener("click", (event) => {
    RECHERCHE
 ========================================================= */
 
-searchConversation?.addEventListener("input", () => {
-  const searchedValue = searchConversation.value
-    .trim()
-    .toLowerCase();
+searchConversation?.addEventListener(
+  "input",
+  () => {
+    const searchedValue =
+      searchConversation.value
+        .trim()
+        .toLowerCase();
 
-  const filteredConversations = conversations.filter(
-    (conversation) =>
-      getConversationName(conversation)
-        .toLowerCase()
-        .includes(searchedValue)
-  );
+    const filteredConversations =
+      conversations.filter(
+        (conversation) =>
+          getConversationName(conversation)
+            .toLowerCase()
+            .includes(searchedValue)
+      );
 
-  renderConversations(filteredConversations);
-});
+    renderConversations(
+      filteredConversations
+    );
+  }
+);
 
 /* =========================================================
    DÉMARRAGE
