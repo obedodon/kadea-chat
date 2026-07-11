@@ -317,3 +317,159 @@ clearConversationButton?.addEventListener(
     await deleteSelectedConversation();
   }
 );
+/* ==================================================
+   PARAMÈTRES
+================================================== */
+
+const settingsButton =
+  document.getElementById("settingsBtn");
+
+const settingsModal =
+  document.getElementById("settingsModal");
+
+const closeSettingsModalButton =
+  document.getElementById("closeSettingsModal");
+
+const settingsThemeButton =
+  document.getElementById("settingsThemeBtn");
+
+const settingsThemeIcon =
+  document.getElementById("settingsThemeIcon");
+
+const settingsThemeText =
+  document.getElementById("settingsThemeText");
+
+const settingsNotificationsButton =
+  document.getElementById("settingsNotificationsBtn");
+
+const settingsNotificationsText =
+  document.getElementById("settingsNotificationsText");
+
+const settingsNotificationsSwitch =
+  document.getElementById("settingsNotificationsSwitch");
+
+const settingsNotificationsCircle =
+  document.getElementById("settingsNotificationsCircle");
+
+function openSettingsModal() {
+  settingsModal?.classList.remove("hidden");
+  settingsModal?.classList.add("flex");
+
+  updateSettingsThemeDisplay();
+  updateNotificationsDisplay();
+}
+
+function closeSettingsModalBox() {
+  settingsModal?.classList.add("hidden");
+  settingsModal?.classList.remove("flex");
+}
+
+function updateSettingsThemeDisplay() {
+  const isDark =
+    document.body.classList.contains("dark-mode");
+
+  if (settingsThemeIcon) {
+    settingsThemeIcon.className = isDark
+      ? "fa-solid fa-sun"
+      : "fa-solid fa-moon";
+  }
+
+  if (settingsThemeText) {
+    settingsThemeText.textContent = isDark
+      ? "Passer en mode clair"
+      : "Passer en mode sombre";
+  }
+}
+
+function toggleSettingsTheme() {
+  const mainThemeButton =
+    document.getElementById("themeToggle");
+
+  mainThemeButton?.click();
+
+  setTimeout(() => {
+    updateSettingsThemeDisplay();
+  }, 50);
+}
+
+function getNotificationsEnabled() {
+  const savedValue =
+    localStorage.getItem("notificationsEnabled");
+
+  return savedValue !== "false";
+}
+
+function updateNotificationsDisplay() {
+  const enabled =
+    getNotificationsEnabled();
+
+  if (settingsNotificationsText) {
+    settingsNotificationsText.textContent = enabled
+      ? "Activées"
+      : "Désactivées";
+  }
+
+  if (settingsNotificationsSwitch) {
+    settingsNotificationsSwitch.className = enabled
+      ? "relative h-6 w-11 rounded-full bg-blue-600 transition"
+      : "relative h-6 w-11 rounded-full bg-slate-400 transition";
+  }
+
+  if (settingsNotificationsCircle) {
+    settingsNotificationsCircle.className = enabled
+      ? "absolute right-1 top-1 h-4 w-4 rounded-full bg-white transition"
+      : "absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition";
+  }
+}
+
+function toggleNotifications() {
+  const nextValue =
+    !getNotificationsEnabled();
+
+  localStorage.setItem(
+    "notificationsEnabled",
+    String(nextValue)
+  );
+
+  updateNotificationsDisplay();
+}
+
+settingsButton?.addEventListener(
+  "click",
+  openSettingsModal
+);
+
+closeSettingsModalButton?.addEventListener(
+  "click",
+  closeSettingsModalBox
+);
+
+settingsThemeButton?.addEventListener(
+  "click",
+  toggleSettingsTheme
+);
+
+settingsNotificationsButton?.addEventListener(
+  "click",
+  toggleNotifications
+);
+
+settingsModal?.addEventListener(
+  "click",
+  (event) => {
+    if (event.target === settingsModal) {
+      closeSettingsModalBox();
+    }
+  }
+);
+
+document.addEventListener(
+  "keydown",
+  (event) => {
+    if (event.key === "Escape") {
+      closeSettingsModalBox();
+    }
+  }
+);
+
+updateNotificationsDisplay();
