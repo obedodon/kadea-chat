@@ -1,514 +1,533 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
 
   <title>Chat - Kadea Chat</title>
 
   <script>
     tailwind.config = {
-      darkMode: "class"
+      darkMode: "class",
     };
   </script>
 
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <link 
-    rel="stylesheet" 
+  <link
+    rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
   />
 </head>
 
-
-<body class="h-screen bg-slate-100 dark:bg-slate-900 overflow-hidden transition-colors">
-
-<main class="h-screen flex">
-
-
-<!-- SIDEBAR -->
-<aside 
-class="w-16 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 flex flex-col items-center justify-between py-4">
-
-
-<div class="space-y-6">
-
-
-<div class="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center">
-<i class="fa-solid fa-comments"></i>
-</div>
-
-
-<button 
-id="themeToggle"
-class="w-10 h-10 rounded-full flex items-center justify-center text-slate-500 hover:text-blue-600 transition hover:scale-110">
-
-<i id="themeIcon" class="fa-solid fa-moon"></i>
-
-</button>
-
-
-<nav class="flex flex-col items-center gap-5 text-slate-500">
-
-<button class="text-blue-600">
-<i class="fa-solid fa-message"></i>
-</button>
-
-
-<a href="profile.html" class="hover:text-blue-600">
-<i class="fa-solid fa-user"></i>
-</a>
-
-
-<button class="hover:text-blue-600">
-<i class="fa-solid fa-gear"></i>
-</button>
-
-</nav>
-
-</div>
-
-
-<button onclick="logout()" class="text-red-500">
-<i class="fa-solid fa-right-from-bracket"></i>
-</button>
-
-
-</aside>
-
-
-
-
-
-<!-- LISTE CONVERSATIONS -->
-<section class="w-80 bg-white border-r border-slate-200 flex flex-col">
-
-
-<div class="p-4 border-b border-slate-200">
-
-
-<div class="flex items-center justify-between mb-4">
-
-
-<div>
-
-<h1 class="text-xl font-bold text-blue-600">
-Kadea Chat
-</h1>
-
-
-<div class="flex items-center gap-2 mt-1">
-
-<span class="w-2 h-2 bg-green-500 rounded-full"></span>
-
-<p 
-id="connectedUserName"
-class="text-xs text-slate-600 font-semibold">
-</p>
-
-</div>
-
-
-</div>
-
-
-
-<button 
-id="openNewConversationModal"
-class="w-9 h-9 bg-blue-600 text-white rounded-full hover:bg-blue-700">
-
-<i class="fa-solid fa-plus"></i>
-
-</button>
-
-
-</div>
-
-
-
-<div class="relative">
-
-<i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-
-
-<input 
-id="searchConversation"
-type="text"
-placeholder="Search conversations..."
-class="w-full bg-slate-100 rounded-lg pl-10 pr-4 py-3 outline-none"
-/>
-
-
-</div>
-
-
-</div>
-
-
-
-<div 
-id="conversationsList"
-class="flex-1 overflow-y-auto">
-
-<p class="p-4 text-sm text-slate-500">
-Chargement des conversations...
-</p>
-
-</div>
-
-
-</section>
-
-
-
-
-
-<!-- ZONE CHAT -->
-<section class="flex-1 flex flex-col bg-slate-50">
-
-
-<header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between">
-
-
-<div class="flex items-center gap-3">
-
-
-<div 
-id="chatAvatar"
-class="w-10 h-10 rounded-full bg-blue-100 overflow-hidden flex items-center justify-center font-bold text-blue-700">
-
-KC
-
-</div>
-
-
-<div>
-
-<h2 
-id="chatName"
-class="font-semibold text-slate-900">
-
-Sélectionne une conversation
-
-</h2>
-
-
-<p class="text-xs text-green-600">
-● Online
-</p>
-
-
-</div>
-
-
-</div>
-<!-- ACTIONS HEADER -->
-<div class="relative flex items-center gap-3 text-slate-500">
-
-<button 
-id="videoCallBtn"
-class="w-10 h-10 rounded-full hover:bg-slate-100 hover:text-blue-600 transition">
-
-<i class="fa-solid fa-video"></i>
-
-</button>
-
-
-<button 
-id="audioCallBtn"
-class="w-10 h-10 rounded-full hover:bg-slate-100 hover:text-green-600 transition">
-
-<i class="fa-solid fa-phone"></i>
-
-</button>
-
-
-<button 
-id="chatMenuBtn"
-class="w-10 h-10 rounded-full hover:bg-slate-100 hover:text-black transition">
-
-<i class="fa-solid fa-ellipsis-vertical"></i>
-
-</button>
-
-
-
-<div 
-id="chatMenu"
-class="hidden absolute right-0 top-12 w-56 bg-white border rounded-xl shadow-lg z-40">
-
-
-<a 
-href="profile.html"
-class="flex gap-3 px-4 py-3 hover:bg-slate-100">
-
-<i class="fa-solid fa-user text-blue-600"></i>
-
-Voir mon profil
-
-</a>
-
-
-
-<button 
-id="clearConversationBtn"
-class="w-full flex gap-3 px-4 py-3 hover:bg-slate-100">
-
-<i class="fa-solid fa-broom text-orange-500"></i>
-
-Effacer la conversation
-
-</button>
-
-
-
-<button 
-onclick="logout()"
-class="w-full flex gap-3 px-4 py-3 text-red-600 hover:bg-red-50">
-
-<i class="fa-solid fa-right-from-bracket"></i>
-
-Déconnexion
-
-</button>
-
-
-</div>
-
-
-</div>
-
-
-</header>
-
-
-
-
-<!-- MESSAGES -->
-<div 
-id="messagesContainer"
-class="flex-1 p-6 overflow-y-auto space-y-3 bg-slate-100">
-
-<div class="h-full flex items-center justify-center text-slate-400">
-
-Clique sur une conversation pour afficher les messages.
-
-</div>
-
-
-</div>
-
-
-
-
-
-<!-- INPUT MESSAGE -->
-<footer class="bg-white border-t border-slate-200 p-4">
-
-
-<form 
-id="messageForm"
-class="flex items-center gap-3">
-
-
-<button 
-type="button"
-class="text-slate-400 hover:text-blue-600">
-
-<i class="fa-regular fa-face-smile text-xl"></i>
-
-</button>
-
-
-
-<input 
-id="messageInput"
-type="text"
-placeholder="Écrire un message..."
-class="flex-1 bg-slate-100 rounded-lg px-4 py-3 outline-none"
-/>
-
-
-
-<button 
-type="submit"
-class="w-11 h-11 bg-blue-600 text-white rounded-full hover:bg-blue-700">
-
-<i class="fa-solid fa-paper-plane"></i>
-
-</button>
-
-
-
-</form>
-
-
-</footer>
-
-
-</section>
-
-
-</main>
-
-
-
-
-
-
-
-<!-- MODAL NOUVELLE CONVERSATION -->
-
-<div 
-id="newConversationModal"
-class="hidden fixed inset-0 bg-black/40 items-center justify-center z-50">
-
-
-<div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
-
-
-<div class="flex justify-between mb-4">
-
-
-<h2 class="text-xl font-bold">
-Nouvelle conversation
-</h2>
-
-
-<button id="closeNewConversationModal">
-
-<i class="fa-solid fa-xmark"></i>
-
-</button>
-
-
-</div>
-
-
-
-<div 
-id="usersList"
-class="space-y-2 max-h-80 overflow-y-auto">
-
-
-Chargement des utilisateurs...
-
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-<!-- MODAL APPELS -->
-
-<div 
-id="uiModal"
-class="hidden fixed inset-0 bg-black/40 items-center justify-center z-50">
-
-
-<div class="bg-white rounded-xl shadow-lg w-full max-w-sm p-6 text-center">
-
-
-<div 
-id="uiModalIcon"
-class="text-4xl mb-3">
-</div>
-
-
-<h2 
-id="uiModalTitle"
-class="text-xl font-bold mb-2">
-</h2>
-
-
-<p 
-id="uiModalText"
-class="text-sm text-slate-500 mb-5">
-</p>
-
-
-
-<button 
-id="closeUiModal"
-class="bg-blue-600 text-white px-6 py-2 rounded-lg">
-
-Fermer
-
-</button>
-
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-<!-- MODAL PHOTO CONVERSATION -->
-
-<div 
-id="conversationAvatarModal"
-class="hidden fixed inset-0 bg-black/90 items-center justify-center z-50">
-
-
-<button 
-id="closeConversationAvatarModal"
-class="absolute top-5 right-8 text-white text-4xl">
-
-×
-
-</button>
-
-
-<div class="text-center">
-
-
-<h2 
-id="conversationAvatarName"
-class="text-white text-2xl font-bold mb-6">
-
-</h2>
-
-
-<div 
-id="conversationBigAvatar">
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-<script src="js/api.js"></script>
-<script src="js/theme.js"></script>
-
-<script src="js/main.js"></script>
-
-<script src="js/conversations.js"></script>
-
-<script src="js/messages.js"></script>
-
-
+<body
+  class="h-screen overflow-hidden bg-slate-100 transition-colors dark:bg-slate-900"
+>
+  <main class="flex h-screen">
+
+    <!-- BARRE LATÉRALE -->
+    <aside
+      class="flex w-16 flex-col items-center justify-between border-r border-slate-200 bg-white py-4 transition-colors dark:border-slate-700 dark:bg-slate-900"
+    >
+      <div class="space-y-6">
+        <div
+          class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white"
+        >
+          <i class="fa-solid fa-comments"></i>
+        </div>
+
+        <button
+          id="themeToggle"
+          type="button"
+          title="Mode sombre ou clair"
+          aria-label="Changer le thème"
+          class="flex h-10 w-10 items-center justify-center rounded-full text-slate-500 transition hover:scale-110 hover:bg-slate-100 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800"
+        >
+          <i id="themeIcon" class="fa-solid fa-moon"></i>
+        </button>
+
+        <nav
+          class="flex flex-col items-center gap-5 text-slate-500 dark:text-slate-300"
+        >
+          <button
+            type="button"
+            title="Messages"
+            class="text-blue-600 transition hover:scale-110"
+          >
+            <i class="fa-solid fa-message"></i>
+          </button>
+
+          <a
+            href="profile.html"
+            title="Mon profil"
+            class="transition hover:scale-110 hover:text-blue-600"
+          >
+            <i class="fa-solid fa-user"></i>
+          </a>
+
+          <button
+            type="button"
+            title="Paramètres"
+            class="transition hover:scale-110 hover:text-blue-600"
+          >
+            <i class="fa-solid fa-gear"></i>
+          </button>
+        </nav>
+      </div>
+
+      <button
+        type="button"
+        onclick="logout()"
+        title="Se déconnecter"
+        class="text-red-500 transition hover:scale-110 hover:text-red-600"
+      >
+        <i class="fa-solid fa-right-from-bracket"></i>
+      </button>
+    </aside>
+
+    <!-- LISTE DES CONVERSATIONS -->
+    <section
+      class="flex w-80 flex-col border-r border-slate-200 bg-white transition-colors dark:border-slate-700 dark:bg-slate-800"
+    >
+      <div
+        class="border-b border-slate-200 p-4 dark:border-slate-700"
+      >
+        <div class="mb-4 flex items-center justify-between">
+          <div>
+            <h1 class="text-xl font-bold text-blue-600">
+              Kadea Chat
+            </h1>
+
+            <div class="mt-1 flex items-center gap-2">
+              <span
+                class="h-2 w-2 rounded-full bg-green-500"
+              ></span>
+
+              <p
+                id="connectedUserName"
+                class="text-xs font-semibold text-slate-600 dark:text-slate-300"
+              ></p>
+            </div>
+          </div>
+
+          <button
+            id="openNewConversationModal"
+            type="button"
+            title="Nouvelle conversation"
+            aria-label="Nouvelle conversation"
+            class="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-white transition hover:scale-110 hover:bg-blue-700"
+          >
+            <i class="fa-solid fa-plus"></i>
+          </button>
+        </div>
+
+        <div class="relative">
+          <i
+            class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+          ></i>
+
+          <input
+            id="searchConversation"
+            type="search"
+            placeholder="Rechercher une conversation..."
+            class="w-full rounded-lg bg-slate-100 py-3 pl-10 pr-4 outline-none transition focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
+          />
+        </div>
+      </div>
+
+      <div
+        id="conversationsList"
+        class="flex-1 overflow-y-auto"
+      >
+        <p class="p-4 text-sm text-slate-500">
+          Chargement des conversations...
+        </p>
+      </div>
+    </section>
+
+    <!-- ZONE DE DISCUSSION -->
+    <section
+      class="flex flex-1 flex-col bg-slate-50 transition-colors dark:bg-slate-900"
+    >
+      <header
+        class="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-6 transition-colors dark:border-slate-700 dark:bg-slate-800"
+      >
+        <div class="flex items-center gap-3">
+          <div
+            id="chatAvatar"
+            class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-blue-100 font-bold text-blue-700"
+          >
+            KC
+          </div>
+
+          <div>
+            <h2
+              id="chatName"
+              class="font-semibold text-slate-900 dark:text-white"
+            >
+              Sélectionne une conversation
+            </h2>
+
+            <p
+              id="chatStatus"
+              class="text-xs text-green-600"
+            >
+              ● En ligne
+            </p>
+          </div>
+        </div>
+
+        <div
+          class="relative flex items-center gap-3 text-slate-500 dark:text-slate-300"
+        >
+          <button
+            id="videoCallBtn"
+            type="button"
+            title="Appel vidéo"
+            class="flex h-10 w-10 items-center justify-center rounded-full transition hover:scale-110 hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-700"
+          >
+            <i class="fa-solid fa-video"></i>
+          </button>
+
+          <button
+            id="audioCallBtn"
+            type="button"
+            title="Appel audio"
+            class="flex h-10 w-10 items-center justify-center rounded-full transition hover:scale-110 hover:bg-slate-100 hover:text-green-600 dark:hover:bg-slate-700"
+          >
+            <i class="fa-solid fa-phone"></i>
+          </button>
+
+          <button
+            id="chatMenuBtn"
+            type="button"
+            title="Plus d’options"
+            class="flex h-10 w-10 items-center justify-center rounded-full transition hover:scale-110 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-700 dark:hover:text-white"
+          >
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+          </button>
+
+          <div
+            id="chatMenu"
+            class="absolute right-0 top-12 z-40 hidden w-56 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-800"
+          >
+            <a
+              href="profile.html"
+              class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
+            >
+              <i class="fa-solid fa-user text-blue-600"></i>
+              Voir mon profil
+            </a>
+
+            <button
+              id="clearConversationBtn"
+              type="button"
+              class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
+            >
+              <i class="fa-solid fa-broom text-orange-500"></i>
+              Effacer la conversation
+            </button>
+
+            <button
+              type="button"
+              onclick="logout()"
+              class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-red-600 transition hover:bg-red-50 dark:hover:bg-red-950/30"
+            >
+              <i class="fa-solid fa-right-from-bracket"></i>
+              Déconnexion
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- MESSAGES -->
+      <div
+        id="messagesContainer"
+        class="flex-1 space-y-2 overflow-y-auto bg-[#efeae2] px-6 py-4 dark:bg-slate-900"
+      >
+        <div
+          class="flex h-full items-center justify-center text-slate-400"
+        >
+          Clique sur une conversation pour afficher les messages.
+        </div>
+      </div>
+
+      <!-- SAISIE DU MESSAGE -->
+      <footer
+        class="border-t border-slate-200 bg-white p-4 transition-colors dark:border-slate-700 dark:bg-slate-800"
+      >
+        <form
+          id="messageForm"
+          class="flex items-center gap-3"
+        >
+          <button
+            id="emojiBtn"
+            type="button"
+            title="Ajouter un emoji"
+            class="text-slate-400 transition hover:scale-110 hover:text-blue-600"
+          >
+            <i class="fa-regular fa-face-smile text-xl"></i>
+          </button>
+
+          <input
+            id="messageInput"
+            type="text"
+            placeholder="Écrire un message..."
+            autocomplete="off"
+            class="flex-1 rounded-lg bg-slate-100 px-4 py-3 outline-none transition focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
+          />
+
+          <button
+            type="submit"
+            title="Envoyer"
+            class="flex h-11 w-11 items-center justify-center rounded-full bg-blue-600 text-white transition hover:scale-110 hover:bg-blue-700"
+          >
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </form>
+      </footer>
+    </section>
+  </main>
+
+  <!-- MODALE NOUVELLE CONVERSATION -->
+  <div
+    id="newConversationModal"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4"
+  >
+    <div
+      class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-800 dark:text-white"
+    >
+      <div class="mb-5 flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold">
+            Nouvelle conversation
+          </h2>
+
+          <p class="mt-1 text-sm text-slate-500 dark:text-slate-300">
+            Choisis une discussion privée ou crée un groupe.
+          </p>
+        </div>
+
+        <button
+          id="closeNewConversationModal"
+          type="button"
+          aria-label="Fermer"
+          class="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/30"
+        >
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+
+      <!-- CHOIX DU TYPE -->
+      <div
+        class="mb-5 grid grid-cols-2 gap-3"
+      >
+        <button
+          id="privateConversationTab"
+          type="button"
+          class="conversation-type-tab rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700"
+        >
+          <i class="fa-solid fa-user mr-2"></i>
+          Discussion privée
+        </button>
+
+        <button
+          id="groupConversationTab"
+          type="button"
+          class="conversation-type-tab rounded-xl bg-slate-100 px-4 py-3 font-semibold text-slate-700 transition hover:bg-slate-200 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
+        >
+          <i class="fa-solid fa-user-group mr-2"></i>
+          Nouveau groupe
+        </button>
+      </div>
+
+      <!-- SECTION DISCUSSION PRIVÉE -->
+      <section id="privateConversationSection">
+        <div class="relative mb-4">
+          <i
+            class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+          ></i>
+
+          <input
+            id="searchPrivateUser"
+            type="search"
+            placeholder="Rechercher un utilisateur..."
+            class="w-full rounded-lg bg-slate-100 py-3 pl-10 pr-4 outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
+          />
+        </div>
+
+        <div
+          id="usersList"
+          class="max-h-80 space-y-2 overflow-y-auto pr-1"
+        >
+          <p class="text-sm text-slate-500">
+            Chargement des utilisateurs...
+          </p>
+        </div>
+      </section>
+
+      <!-- SECTION GROUPE -->
+      <section
+        id="groupConversationSection"
+        class="hidden"
+      >
+        <div class="mb-4">
+          <label
+            for="groupName"
+            class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200"
+          >
+            Nom du groupe
+          </label>
+
+          <input
+            id="groupName"
+            type="text"
+            maxlength="60"
+            placeholder="Exemple : Développeurs Kadea"
+            class="w-full rounded-lg bg-slate-100 px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
+          />
+        </div>
+
+        <div class="mb-4">
+          <label
+            for="groupAvatarUrl"
+            class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200"
+          >
+            Photo du groupe
+            <span class="font-normal text-slate-400">
+              (facultatif)
+            </span>
+          </label>
+
+          <input
+            id="groupAvatarUrl"
+            type="url"
+            placeholder="https://image-du-groupe..."
+            class="w-full rounded-lg bg-slate-100 px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
+          />
+        </div>
+
+        <div class="relative mb-4">
+          <i
+            class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+          ></i>
+
+          <input
+            id="searchGroupUser"
+            type="search"
+            placeholder="Rechercher des participants..."
+            class="w-full rounded-lg bg-slate-100 py-3 pl-10 pr-4 outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
+          />
+        </div>
+
+        <div
+          class="mb-3 flex items-center justify-between"
+        >
+          <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">
+            Sélectionne au moins deux participants
+          </p>
+
+          <span
+            id="selectedGroupCount"
+            class="rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700"
+          >
+            0 sélectionné
+          </span>
+        </div>
+
+        <div
+          id="groupUsersList"
+          class="max-h-64 space-y-2 overflow-y-auto pr-1"
+        >
+          <p class="text-sm text-slate-500">
+            Chargement des utilisateurs...
+          </p>
+        </div>
+
+        <p
+          id="groupCreationMessage"
+          class="mt-4 text-center text-sm font-medium"
+        ></p>
+
+        <button
+          id="createGroupConversationBtn"
+          type="button"
+          class="mt-4 w-full rounded-lg bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <i class="fa-solid fa-user-group mr-2"></i>
+          Créer le groupe
+        </button>
+      </section>
+    </div>
+  </div>
+
+  <!-- MODALE APPELS ET INFORMATIONS -->
+  <div
+    id="uiModal"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4"
+  >
+    <div
+      class="w-full max-w-sm rounded-xl bg-white p-6 text-center shadow-lg dark:bg-slate-800 dark:text-white"
+    >
+      <div
+        id="uiModalIcon"
+        class="mb-3 text-4xl"
+      ></div>
+
+      <h2
+        id="uiModalTitle"
+        class="mb-2 text-xl font-bold"
+      ></h2>
+
+      <p
+        id="uiModalText"
+        class="mb-5 text-sm text-slate-500 dark:text-slate-300"
+      ></p>
+
+      <button
+        id="closeUiModal"
+        type="button"
+        class="rounded-lg bg-blue-600 px-6 py-2 text-white transition hover:bg-blue-700"
+      >
+        Fermer
+      </button>
+    </div>
+  </div>
+
+  <!-- MODALE PHOTO DE CONVERSATION -->
+  <div
+    id="conversationAvatarModal"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/90 p-6"
+  >
+    <button
+      id="closeConversationAvatarModal"
+      type="button"
+      aria-label="Fermer"
+      class="absolute right-8 top-5 text-4xl text-white transition hover:scale-110"
+    >
+      ×
+    </button>
+
+    <div class="text-center">
+      <h2
+        id="conversationAvatarName"
+        class="mb-6 text-2xl font-bold text-white"
+      ></h2>
+
+      <div
+        id="conversationBigAvatar"
+        class="flex items-center justify-center"
+      ></div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/conversations.js"></script>
+  <script src="js/messages.js"></script>
 </body>
-
 </html>

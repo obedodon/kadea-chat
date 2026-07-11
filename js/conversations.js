@@ -1,118 +1,76 @@
-const conversationsList = document.getElementById("conversationsList");
-const searchConversation = document.getElementById("searchConversation");
+const conversationsList =
+  document.getElementById("conversationsList");
 
-const modal = document.getElementById("newConversationModal");
-const openModalBtn = document.getElementById("openNewConversationModal");
-const closeModalBtn = document.getElementById("closeNewConversationModal");
-const usersList = document.getElementById("usersList");
+const searchConversation =
+  document.getElementById("searchConversation");
 
-const conversationAvatarModal = document.getElementById(
-  "conversationAvatarModal"
-);
-const conversationBigAvatar = document.getElementById(
-  "conversationBigAvatar"
-);
-const conversationAvatarName = document.getElementById(
-  "conversationAvatarName"
-);
-const closeConversationAvatarModal = document.getElementById(
-  "closeConversationAvatarModal"
-);
+const newConversationModal =
+  document.getElementById("newConversationModal");
+
+const openNewConversationModalButton =
+  document.getElementById("openNewConversationModal");
+
+const closeNewConversationModalButton =
+  document.getElementById("closeNewConversationModal");
+
+const privateConversationTab =
+  document.getElementById("privateConversationTab");
+
+const groupConversationTab =
+  document.getElementById("groupConversationTab");
+
+const privateConversationSection =
+  document.getElementById("privateConversationSection");
+
+const groupConversationSection =
+  document.getElementById("groupConversationSection");
+
+const usersList =
+  document.getElementById("usersList");
+
+const groupUsersList =
+  document.getElementById("groupUsersList");
+
+const searchPrivateUser =
+  document.getElementById("searchPrivateUser");
+
+const searchGroupUser =
+  document.getElementById("searchGroupUser");
+
+const groupNameInput =
+  document.getElementById("groupName");
+
+const groupAvatarUrlInput =
+  document.getElementById("groupAvatarUrl");
+
+const selectedGroupCount =
+  document.getElementById("selectedGroupCount");
+
+const groupCreationMessage =
+  document.getElementById("groupCreationMessage");
+
+const createGroupConversationButton =
+  document.getElementById("createGroupConversationBtn");
+
+const conversationAvatarModal =
+  document.getElementById("conversationAvatarModal");
+
+const conversationBigAvatar =
+  document.getElementById("conversationBigAvatar");
+
+const conversationAvatarName =
+  document.getElementById("conversationAvatarName");
+
+const closeConversationAvatarModalButton =
+  document.getElementById("closeConversationAvatarModal");
 
 let conversations = [];
+let availableUsers = [];
 let activeConversationId = null;
 
-/*
-  Cette variable globale permet à main.js de connaître
-  la conversation actuellement sélectionnée.
-*/
+const selectedGroupUserIds = new Set();
+
 window.activeConversationId = null;
-
-/* =========================================================
-   STYLES DES CONVERSATIONS ET MODE SOMBRE
-========================================================= */
-
-const conversationStyles = document.createElement("style");
-
-conversationStyles.textContent = `
-  .conversation-item {
-    border-bottom: 1px solid #e2e8f0;
-    background: #ffffff;
-    color: #0f172a;
-    transition:
-      background-color 0.2s,
-      color 0.2s;
-  }
-
-  .conversation-item:hover {
-    background: #f1f5f9;
-  }
-
-  .conversation-item.active {
-    background: #dbeafe;
-  }
-
-  .conversation-name {
-    color: #0f172a;
-  }
-
-  .conversation-preview {
-    color: #64748b;
-  }
-
-  .conversation-time {
-    color: #3b82f6;
-  }
-
-  body.dark-mode .conversation-item {
-    background: #1e293b !important;
-    border-color: #334155 !important;
-    color: #ffffff !important;
-  }
-
-  body.dark-mode .conversation-item:hover {
-    background: #334155 !important;
-  }
-
-  body.dark-mode .conversation-item.active {
-    background: #1e3a5f !important;
-  }
-
-  body.dark-mode .conversation-name {
-    color: #ffffff !important;
-  }
-
-  body.dark-mode .conversation-preview {
-    color: #cbd5e1 !important;
-  }
-
-  body.dark-mode .conversation-time {
-    color: #93c5fd !important;
-  }
-
-  body.dark-mode #conversationsList {
-    background: #1e293b !important;
-  }
-
-  body.dark-mode #newConversationModal > div {
-    background: #1e293b !important;
-    color: #ffffff !important;
-  }
-
-  body.dark-mode .user-choice {
-    color: #ffffff !important;
-  }
-
-  body.dark-mode .user-choice:hover {
-    background: #334155 !important;
-  }
-
-  body.dark-mode .user-choice-email {
-    color: #cbd5e1 !important;
-  }
-`;
-
-document.head.appendChild(conversationStyles);
 
 /* =========================================================
    OUTILS
@@ -140,7 +98,9 @@ function safeJsonParse(value) {
 }
 
 function getCurrentUser() {
-  return safeJsonParse(localStorage.getItem("user"));
+  return safeJsonParse(
+    localStorage.getItem("user")
+  );
 }
 
 function getInitials(name) {
@@ -157,8 +117,24 @@ function getInitials(name) {
     .toUpperCase();
 }
 
+function extractUsers(result) {
+  if (Array.isArray(result.data?.users)) {
+    return result.data.users;
+  }
+
+  if (Array.isArray(result.data)) {
+    return result.data;
+  }
+
+  if (Array.isArray(result.users)) {
+    return result.users;
+  }
+
+  return [];
+}
+
 /* =========================================================
-   INFORMATIONS D’UNE CONVERSATION
+   INFORMATIONS DES CONVERSATIONS
 ========================================================= */
 
 function getOtherParticipant(conversation) {
@@ -173,13 +149,16 @@ function getOtherParticipant(conversation) {
       (participant) =>
         participant.user?.id &&
         participant.user.id !== currentUser?.id
-    ) || conversation.participants[0]
+    ) ||
+    conversation.participants[0] ||
+    null
   );
 }
 
 function getConversationName(conversation) {
   if (conversation.type === "private") {
-    const otherParticipant = getOtherParticipant(conversation);
+    const otherParticipant =
+      getOtherParticipant(conversation);
 
     return (
       otherParticipant?.user?.fullName ||
@@ -189,20 +168,32 @@ function getConversationName(conversation) {
     );
   }
 
-  return conversation.name || "Groupe";
+  return (
+    conversation.name ||
+    conversation.title ||
+    "Groupe"
+  );
 }
 
 function getConversationAvatar(conversation) {
   if (conversation.type === "private") {
-    const otherParticipant = getOtherParticipant(conversation);
+    const otherParticipant =
+      getOtherParticipant(conversation);
 
-    return otherParticipant?.user?.avatarUrl || null;
+    return (
+      otherParticipant?.user?.avatarUrl ||
+      null
+    );
   }
 
-  return conversation.avatarUrl || null;
+  return (
+    conversation.avatarUrl ||
+    conversation.imageUrl ||
+    null
+  );
 }
 
-function getLastMessageObject(conversation) {
+function getLastMessage(conversation) {
   if (conversation.lastMessage) {
     return conversation.lastMessage;
   }
@@ -231,14 +222,16 @@ function getMessageSenderName(message) {
 }
 
 function getLastMessagePreview(conversation) {
-  const lastMessage = getLastMessageObject(conversation);
+  const lastMessage =
+    getLastMessage(conversation);
 
   if (!lastMessage?.content) {
     return "Aucun message pour le moment";
   }
 
   if (conversation.type === "group") {
-    const senderName = getMessageSenderName(lastMessage);
+    const senderName =
+      getMessageSenderName(lastMessage);
 
     return senderName
       ? `${senderName} : ${lastMessage.content}`
@@ -249,13 +242,19 @@ function getLastMessagePreview(conversation) {
 }
 
 function getLastMessageTime(conversation) {
-  const lastMessage = getLastMessageObject(conversation);
+  const lastMessage =
+    getLastMessage(conversation);
 
-  if (!lastMessage?.createdAt) {
+  const dateValue =
+    lastMessage?.createdAt ||
+    conversation.updatedAt ||
+    conversation.createdAt;
+
+  if (!dateValue) {
     return "";
   }
 
-  const date = new Date(lastMessage.createdAt);
+  const date = new Date(dateValue);
 
   if (Number.isNaN(date.getTime())) {
     return "";
@@ -263,7 +262,10 @@ function getLastMessageTime(conversation) {
 
   const today = new Date();
 
-  if (date.toDateString() === today.toDateString()) {
+  if (
+    date.toDateString() ===
+    today.toDateString()
+  ) {
     return date.toLocaleTimeString("fr-FR", {
       hour: "2-digit",
       minute: "2-digit",
@@ -277,26 +279,32 @@ function getLastMessageTime(conversation) {
 }
 
 function getConversationActivityDate(conversation) {
-  const lastMessage = getLastMessageObject(conversation);
+  const lastMessage =
+    getLastMessage(conversation);
 
-  return new Date(
+  const dateValue =
     lastMessage?.createdAt ||
-      conversation.updatedAt ||
-      conversation.createdAt ||
-      0
-  ).getTime();
+    conversation.updatedAt ||
+    conversation.createdAt ||
+    0;
+
+  return new Date(dateValue).getTime();
 }
 
 function sortConversationsByActivity(list) {
   return [...list].sort(
     (conversationA, conversationB) =>
-      getConversationActivityDate(conversationB) -
-      getConversationActivityDate(conversationA)
+      getConversationActivityDate(
+        conversationB
+      ) -
+      getConversationActivityDate(
+        conversationA
+      )
   );
 }
 
 /* =========================================================
-   PHOTO EN GRAND
+   PHOTO DE CONVERSATION
 ========================================================= */
 
 function openConversationAvatar(
@@ -312,7 +320,8 @@ function openConversationAvatar(
   }
 
   if (conversationAvatarName) {
-    conversationAvatarName.textContent = name;
+    conversationAvatarName.textContent =
+      name;
   }
 
   if (avatarUrl) {
@@ -320,39 +329,51 @@ function openConversationAvatar(
       <img
         src="${escapeHtml(avatarUrl)}"
         alt="${escapeHtml(name)}"
-        class="max-w-[90vw] max-h-[80vh] object-contain rounded-xl shadow-2xl"
+        class="max-h-[80vh] max-w-[90vw] rounded-xl object-contain shadow-2xl"
       >
     `;
   } else {
     conversationBigAvatar.innerHTML = `
       <div
-        class="w-72 h-72 rounded-full bg-blue-100
-               flex items-center justify-center
-               text-7xl font-bold text-blue-600"
+        class="flex h-72 w-72 items-center justify-center rounded-full bg-blue-100 text-7xl font-bold text-blue-600"
       >
         ${escapeHtml(initials)}
       </div>
     `;
   }
 
-  conversationAvatarModal.classList.remove("hidden");
-  conversationAvatarModal.classList.add("flex");
+  conversationAvatarModal.classList.remove(
+    "hidden"
+  );
+
+  conversationAvatarModal.classList.add(
+    "flex"
+  );
 }
 
 function closeConversationAvatar() {
-  conversationAvatarModal?.classList.add("hidden");
-  conversationAvatarModal?.classList.remove("flex");
+  conversationAvatarModal?.classList.add(
+    "hidden"
+  );
+
+  conversationAvatarModal?.classList.remove(
+    "flex"
+  );
 }
 
-closeConversationAvatarModal?.addEventListener(
-  "click",
-  closeConversationAvatar
-);
+closeConversationAvatarModalButton
+  ?.addEventListener(
+    "click",
+    closeConversationAvatar
+  );
 
 conversationAvatarModal?.addEventListener(
   "click",
   (event) => {
-    if (event.target === conversationAvatarModal) {
+    if (
+      event.target ===
+      conversationAvatarModal
+    ) {
       closeConversationAvatar();
     }
   }
@@ -369,7 +390,10 @@ function renderConversations(list) {
 
   conversationsList.innerHTML = "";
 
-  if (!Array.isArray(list) || list.length === 0) {
+  if (
+    !Array.isArray(list) ||
+    list.length === 0
+  ) {
     conversationsList.innerHTML = `
       <p class="p-4 text-sm text-slate-500">
         Aucune conversation trouvée.
@@ -382,143 +406,202 @@ function renderConversations(list) {
   const sortedConversations =
     sortConversationsByActivity(list);
 
-  sortedConversations.forEach((conversation) => {
-    const name = getConversationName(conversation);
-    const avatarUrl =
-      getConversationAvatar(conversation);
-    const initials = getInitials(name);
-    const lastMessagePreview =
-      getLastMessagePreview(conversation);
-    const time = getLastMessageTime(conversation);
-    const isActive =
-      activeConversationId === conversation.id;
+  sortedConversations.forEach(
+    (conversation) => {
+      const name =
+        getConversationName(conversation);
 
-    const article =
-      document.createElement("article");
+      const avatarUrl =
+        getConversationAvatar(conversation);
 
-    article.className = `
-      conversation-item
-      p-4
-      cursor-pointer
-      ${isActive ? "active" : ""}
-    `;
+      const initials =
+        getInitials(name);
 
-    article.innerHTML = `
-      <div class="flex items-center gap-3">
+      const lastMessage =
+        getLastMessagePreview(conversation);
 
-        <button
-          type="button"
-          class="
-            conversation-avatar
-            w-12 h-12 shrink-0 rounded-full
-            bg-blue-100 overflow-hidden
-            flex items-center justify-center
-            font-bold text-blue-700
-            transition-all duration-300
-            hover:scale-110
-            hover:shadow-lg
-            hover:ring-4
-            hover:ring-blue-200
-          "
-          aria-label="Voir la photo de ${escapeHtml(name)}"
-        >
-          ${
-            avatarUrl
-              ? `
-                <img
-                  src="${escapeHtml(avatarUrl)}"
-                  alt="${escapeHtml(name)}"
-                  class="w-full h-full object-cover"
-                >
-              `
-              : escapeHtml(initials)
-          }
-        </button>
+      const time =
+        getLastMessageTime(conversation);
 
-        <div class="flex-1 min-w-0">
+      const isActive =
+        activeConversationId ===
+        conversation.id;
 
-          <div class="flex items-center justify-between gap-3">
+      const isGroup =
+        conversation.type === "group";
 
-            <h3 class="conversation-name font-semibold truncate">
-              ${escapeHtml(name)}
-            </h3>
+      const article =
+        document.createElement("article");
 
-            <span class="conversation-time text-xs shrink-0">
-              ${escapeHtml(time)}
-            </span>
+      article.className = `
+        conversation-item
+        cursor-pointer
+        border-b
+        border-slate-200
+        p-4
+        transition
+        hover:bg-slate-100
+        dark:border-slate-700
+        dark:hover:bg-slate-700
+        ${
+          isActive
+            ? "bg-blue-50 dark:bg-slate-700"
+            : "bg-white dark:bg-slate-800"
+        }
+      `;
+
+      article.innerHTML = `
+        <div class="flex items-center gap-3">
+
+          <button
+            type="button"
+            class="conversation-avatar relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-100 font-bold text-blue-700 transition hover:scale-110 hover:ring-4 hover:ring-blue-200"
+            aria-label="Voir la photo de ${escapeHtml(name)}"
+          >
+            ${
+              avatarUrl
+                ? `
+                  <img
+                    src="${escapeHtml(avatarUrl)}"
+                    alt="${escapeHtml(name)}"
+                    class="h-full w-full object-cover"
+                  >
+                `
+                : escapeHtml(initials)
+            }
+
+            ${
+              isGroup
+                ? `
+                  <span
+                    class="absolute bottom-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[8px] text-white"
+                  >
+                    <i class="fa-solid fa-user-group"></i>
+                  </span>
+                `
+                : ""
+            }
+          </button>
+
+          <div class="min-w-0 flex-1">
+
+            <div class="flex items-center justify-between gap-3">
+
+              <h3
+                class="truncate font-semibold text-slate-900 dark:text-white"
+              >
+                ${escapeHtml(name)}
+              </h3>
+
+              <span
+                class="shrink-0 text-xs text-blue-500 dark:text-blue-300"
+              >
+                ${escapeHtml(time)}
+              </span>
+
+            </div>
+
+            <p
+              class="mt-0.5 truncate text-sm text-slate-500 dark:text-slate-300"
+            >
+              ${escapeHtml(lastMessage)}
+            </p>
 
           </div>
 
-          <p class="conversation-preview text-sm truncate mt-0.5">
-            ${escapeHtml(lastMessagePreview)}
-          </p>
-
         </div>
+      `;
 
-      </div>
-    `;
-
-    const avatarButton =
-      article.querySelector(".conversation-avatar");
-
-    avatarButton?.addEventListener(
-      "click",
-      (event) => {
-        event.stopPropagation();
-
-        openConversationAvatar(
-          avatarUrl,
-          initials,
-          name
+      const avatarButton =
+        article.querySelector(
+          ".conversation-avatar"
         );
-      }
-    );
 
-    article.addEventListener("click", () => {
-      activeConversationId = conversation.id;
+      avatarButton?.addEventListener(
+        "click",
+        (event) => {
+          event.stopPropagation();
 
-      /*
-        On expose aussi l'identifiant dans window
-        pour que main.js puisse supprimer la conversation.
-      */
-      window.activeConversationId =
-        conversation.id;
-
-      const chatName =
-        document.getElementById("chatName");
-
-      const chatAvatar =
-        document.getElementById("chatAvatar");
-
-      if (chatName) {
-        chatName.textContent = name;
-      }
-
-      if (chatAvatar) {
-        if (avatarUrl) {
-          chatAvatar.innerHTML = `
-            <img
-              src="${escapeHtml(avatarUrl)}"
-              alt="${escapeHtml(name)}"
-              class="w-full h-full object-cover"
-            >
-          `;
-        } else {
-          chatAvatar.textContent = initials;
+          openConversationAvatar(
+            avatarUrl,
+            initials,
+            name
+          );
         }
-      }
+      );
 
-      renderConversations(conversations);
+      article.addEventListener(
+        "click",
+        () => {
+          activeConversationId =
+            conversation.id;
 
-      if (
-        typeof window.loadMessages === "function"
-      ) {
-        window.loadMessages(conversation.id);
-      }
-    });
+          window.activeConversationId =
+            conversation.id;
 
-    conversationsList.appendChild(article);
-  });
+          const chatName =
+            document.getElementById(
+              "chatName"
+            );
+
+          const chatAvatar =
+            document.getElementById(
+              "chatAvatar"
+            );
+
+          const chatStatus =
+            document.getElementById(
+              "chatStatus"
+            );
+
+          if (chatName) {
+            chatName.textContent = name;
+          }
+
+          if (chatStatus) {
+            chatStatus.textContent = isGroup
+              ? `${
+                  conversation.participants
+                    ?.length || 0
+                } participant(s)`
+              : "● En ligne";
+          }
+
+          if (chatAvatar) {
+            if (avatarUrl) {
+              chatAvatar.innerHTML = `
+                <img
+                  src="${escapeHtml(avatarUrl)}"
+                  alt="${escapeHtml(name)}"
+                  class="h-full w-full object-cover"
+                >
+              `;
+            } else {
+              chatAvatar.textContent =
+                initials;
+            }
+          }
+
+          renderConversations(
+            conversations
+          );
+
+          if (
+            typeof window.loadMessages ===
+            "function"
+          ) {
+            window.loadMessages(
+              conversation.id
+            );
+          }
+        }
+      );
+
+      conversationsList.appendChild(
+        article
+      );
+    }
+  );
 }
 
 /* =========================================================
@@ -546,9 +629,13 @@ async function loadConversations() {
       }
     );
 
-    const result = await response.json();
+    const result =
+      await response.json();
 
-    if (!response.ok || !result.success) {
+    if (
+      !response.ok ||
+      !result.success
+    ) {
       conversationsList.innerHTML = `
         <p class="p-4 text-sm text-red-500">
           ${escapeHtml(
@@ -562,23 +649,30 @@ async function loadConversations() {
     }
 
     conversations =
-      result.data?.conversations || [];
+      result.data?.conversations ||
+      result.data ||
+      [];
 
-    /*
-      Si la conversation sélectionnée a été supprimée,
-      on oublie sa sélection.
-    */
-    const stillExists = conversations.some(
-      (conversation) =>
-        conversation.id === activeConversationId
-    );
-
-    if (!stillExists) {
-      activeConversationId = null;
-      window.activeConversationId = null;
+    if (!Array.isArray(conversations)) {
+      conversations = [];
     }
 
-    renderConversations(conversations);
+    const activeConversationExists =
+      conversations.some(
+        (conversation) =>
+          conversation.id ===
+          activeConversationId
+      );
+
+    if (!activeConversationExists) {
+      activeConversationId = null;
+      window.activeConversationId =
+        null;
+    }
+
+    renderConversations(
+      conversations
+    );
   } catch (error) {
     console.error(
       "Erreur conversations :",
@@ -596,31 +690,38 @@ async function loadConversations() {
 window.loadConversations =
   loadConversations;
 
+window.clearSelectedConversation =
+  function () {
+    activeConversationId = null;
+
+    window.activeConversationId =
+      null;
+
+    renderConversations(
+      conversations
+    );
+  };
+
 /* =========================================================
-   EFFACER LA SÉLECTION ACTIVE
-========================================================= */
-
-window.clearSelectedConversation = function () {
-  activeConversationId = null;
-  window.activeConversationId = null;
-
-  renderConversations(conversations);
-};
-
-/* =========================================================
-   NOUVELLE CONVERSATION
+   CHARGEMENT DES UTILISATEURS
 ========================================================= */
 
 async function loadUsers() {
-  if (!usersList) {
-    return;
+  if (usersList) {
+    usersList.innerHTML = `
+      <p class="text-sm text-slate-500">
+        Chargement des utilisateurs...
+      </p>
+    `;
   }
 
-  usersList.innerHTML = `
-    <p class="text-sm text-slate-500">
-      Chargement des utilisateurs...
-    </p>
-  `;
+  if (groupUsersList) {
+    groupUsersList.innerHTML = `
+      <p class="text-sm text-slate-500">
+        Chargement des utilisateurs...
+      </p>
+    `;
+  }
 
   try {
     const response = await fetch(
@@ -632,67 +733,109 @@ async function loadUsers() {
       }
     );
 
-    const result = await response.json();
+    const result =
+      await response.json();
 
-    if (!response.ok || !result.success) {
-      usersList.innerHTML = `
-        <p class="text-sm text-red-500">
-          ${escapeHtml(
-            result.message ||
-              "Impossible de charger les utilisateurs."
-          )}
-        </p>
-      `;
+    if (
+      !response.ok ||
+      !result.success
+    ) {
+      const errorMessage =
+        result.message ||
+        "Impossible de charger les utilisateurs.";
+
+      if (usersList) {
+        usersList.innerHTML = `
+          <p class="text-sm text-red-500">
+            ${escapeHtml(errorMessage)}
+          </p>
+        `;
+      }
+
+      if (groupUsersList) {
+        groupUsersList.innerHTML = `
+          <p class="text-sm text-red-500">
+            ${escapeHtml(errorMessage)}
+          </p>
+        `;
+      }
 
       return;
     }
 
-    renderUsers(result.data?.users || []);
+    const currentUser =
+      getCurrentUser();
+
+    availableUsers =
+      extractUsers(result).filter(
+        (user) =>
+          user.id !==
+          currentUser?.id
+      );
+
+    renderPrivateUsers(
+      availableUsers
+    );
+
+    renderGroupUsers(
+      availableUsers
+    );
   } catch (error) {
     console.error(
       "Erreur utilisateurs :",
       error
     );
 
-    usersList.innerHTML = `
-      <p class="text-sm text-red-500">
-        Erreur réseau. Impossible de charger les utilisateurs.
-      </p>
-    `;
+    if (usersList) {
+      usersList.innerHTML = `
+        <p class="text-sm text-red-500">
+          Erreur réseau. Impossible de charger les utilisateurs.
+        </p>
+      `;
+    }
+
+    if (groupUsersList) {
+      groupUsersList.innerHTML = `
+        <p class="text-sm text-red-500">
+          Erreur réseau. Impossible de charger les utilisateurs.
+        </p>
+      `;
+    }
   }
 }
 
-function renderUsers(users) {
+/* =========================================================
+   DISCUSSION PRIVÉE
+========================================================= */
+
+function renderPrivateUsers(users) {
   if (!usersList) {
     return;
   }
 
   usersList.innerHTML = "";
 
-  const currentUser = getCurrentUser();
-
-  const availableUsers = users.filter(
-    (user) => user.id !== currentUser?.id
-  );
-
-  if (availableUsers.length === 0) {
+  if (users.length === 0) {
     usersList.innerHTML = `
       <p class="text-sm text-slate-500">
-        Aucun autre utilisateur trouvé.
+        Aucun utilisateur trouvé.
       </p>
     `;
 
     return;
   }
 
-  availableUsers.forEach((user) => {
+  users.forEach((user) => {
     const name =
       user.fullName ||
       user.name ||
       "Utilisateur";
 
-    const email = user.email || "";
-    const initials = getInitials(name);
+    const email =
+      user.email || "";
+
+    const initials =
+      getInitials(name);
 
     const button =
       document.createElement("button");
@@ -701,23 +844,21 @@ function renderUsers(users) {
 
     button.className = `
       user-choice
+      flex
       w-full
-      flex items-center gap-3
-      p-3
+      items-center
+      gap-3
       rounded-lg
-      hover:bg-blue-50
-      transition
+      p-3
       text-left
+      transition
+      hover:bg-blue-50
+      dark:hover:bg-slate-700
     `;
 
     button.innerHTML = `
       <div
-        class="
-          w-10 h-10 shrink-0 rounded-full
-          bg-blue-100 overflow-hidden
-          flex items-center justify-center
-          font-bold text-blue-700
-        "
+        class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-100 font-bold text-blue-700"
       >
         ${
           user.avatarUrl
@@ -725,32 +866,39 @@ function renderUsers(users) {
               <img
                 src="${escapeHtml(user.avatarUrl)}"
                 alt="${escapeHtml(name)}"
-                class="w-full h-full object-cover"
+                class="h-full w-full object-cover"
               >
             `
             : escapeHtml(initials)
         }
       </div>
 
-      <div class="flex-1 min-w-0">
+      <div class="min-w-0 flex-1">
 
-        <p class="font-semibold truncate">
+        <p
+          class="truncate font-semibold text-slate-900 dark:text-white"
+        >
           ${escapeHtml(name)}
         </p>
 
-        <p class="user-choice-email text-sm text-slate-500 truncate">
+        <p
+          class="truncate text-sm text-slate-500 dark:text-slate-300"
+        >
           ${escapeHtml(email)}
         </p>
 
       </div>
     `;
 
-    button.addEventListener("click", () => {
-      createPrivateConversation(
-        user.id,
-        name
-      );
-    });
+    button.addEventListener(
+      "click",
+      () => {
+        createPrivateConversation(
+          user.id,
+          name
+        );
+      }
+    );
 
     usersList.appendChild(button);
   });
@@ -785,9 +933,13 @@ async function createPrivateConversation(
       }
     );
 
-    const result = await response.json();
+    const result =
+      await response.json();
 
-    if (!response.ok || !result.success) {
+    if (
+      !response.ok ||
+      !result.success
+    ) {
       usersList.innerHTML = `
         <p class="text-sm text-red-500">
           ${escapeHtml(
@@ -800,11 +952,12 @@ async function createPrivateConversation(
       return;
     }
 
-    closeModal();
+    closeNewConversationModal();
+
     await loadConversations();
   } catch (error) {
     console.error(
-      "Erreur création conversation :",
+      "Erreur création conversation privée :",
       error
     );
 
@@ -816,42 +969,475 @@ async function createPrivateConversation(
   }
 }
 
-function openModal() {
-  modal?.classList.remove("hidden");
-  modal?.classList.add("flex");
+/* =========================================================
+   CRÉATION D’UN GROUPE
+========================================================= */
+
+function updateSelectedGroupCount() {
+  if (!selectedGroupCount) {
+    return;
+  }
+
+  const count =
+    selectedGroupUserIds.size;
+
+  selectedGroupCount.textContent =
+    `${count} sélectionné${
+      count > 1 ? "s" : ""
+    }`;
+
+  if (createGroupConversationButton) {
+    createGroupConversationButton.disabled =
+      count < 2;
+  }
+}
+
+function renderGroupUsers(users) {
+  if (!groupUsersList) {
+    return;
+  }
+
+  groupUsersList.innerHTML = "";
+
+  if (users.length === 0) {
+    groupUsersList.innerHTML = `
+      <p class="text-sm text-slate-500">
+        Aucun utilisateur trouvé.
+      </p>
+    `;
+
+    return;
+  }
+
+  users.forEach((user) => {
+    const name =
+      user.fullName ||
+      user.name ||
+      "Utilisateur";
+
+    const email =
+      user.email || "";
+
+    const initials =
+      getInitials(name);
+
+    const isSelected =
+      selectedGroupUserIds.has(
+        user.id
+      );
+
+    const label =
+      document.createElement("label");
+
+    label.className = `
+      group-user-choice
+      flex
+      cursor-pointer
+      items-center
+      gap-3
+      rounded-lg
+      border
+      p-3
+      transition
+      ${
+        isSelected
+          ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30"
+          : "border-transparent hover:bg-slate-100 dark:hover:bg-slate-700"
+      }
+    `;
+
+    label.innerHTML = `
+      <input
+        type="checkbox"
+        value="${escapeHtml(user.id)}"
+        class="group-user-checkbox h-4 w-4 accent-blue-600"
+        ${isSelected ? "checked" : ""}
+      >
+
+      <div
+        class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-100 font-bold text-blue-700"
+      >
+        ${
+          user.avatarUrl
+            ? `
+              <img
+                src="${escapeHtml(user.avatarUrl)}"
+                alt="${escapeHtml(name)}"
+                class="h-full w-full object-cover"
+              >
+            `
+            : escapeHtml(initials)
+        }
+      </div>
+
+      <div class="min-w-0 flex-1">
+
+        <p
+          class="truncate font-semibold text-slate-900 dark:text-white"
+        >
+          ${escapeHtml(name)}
+        </p>
+
+        <p
+          class="truncate text-sm text-slate-500 dark:text-slate-300"
+        >
+          ${escapeHtml(email)}
+        </p>
+
+      </div>
+    `;
+
+    const checkbox =
+      label.querySelector(
+        ".group-user-checkbox"
+      );
+
+    checkbox?.addEventListener(
+      "change",
+      () => {
+        if (checkbox.checked) {
+          selectedGroupUserIds.add(
+            user.id
+          );
+        } else {
+          selectedGroupUserIds.delete(
+            user.id
+          );
+        }
+
+        updateSelectedGroupCount();
+
+        renderGroupUsers(
+          filterGroupUsers()
+        );
+      }
+    );
+
+    groupUsersList.appendChild(label);
+  });
+}
+
+function filterGroupUsers() {
+  const searchValue =
+    searchGroupUser?.value
+      .trim()
+      .toLowerCase() || "";
+
+  return availableUsers.filter(
+    (user) => {
+      const fullName =
+        (
+          user.fullName ||
+          user.name ||
+          ""
+        ).toLowerCase();
+
+      const email =
+        (
+          user.email || ""
+        ).toLowerCase();
+
+      return (
+        fullName.includes(
+          searchValue
+        ) ||
+        email.includes(
+          searchValue
+        )
+      );
+    }
+  );
+}
+
+function showGroupCreationMessage(
+  message,
+  type = "error"
+) {
+  if (!groupCreationMessage) {
+    return;
+  }
+
+  groupCreationMessage.textContent =
+    message;
+
+  groupCreationMessage.className =
+    type === "success"
+      ? "mt-4 text-center text-sm font-medium text-green-600"
+      : "mt-4 text-center text-sm font-medium text-red-600";
+}
+
+async function createGroupConversation() {
+  const groupName =
+    groupNameInput?.value
+      .trim() || "";
+
+  const avatarUrl =
+    groupAvatarUrlInput?.value
+      .trim() || "";
+
+  const participantIds = [
+    ...selectedGroupUserIds,
+  ];
+
+  if (!groupName) {
+    showGroupCreationMessage(
+      "Le nom du groupe est obligatoire."
+    );
+
+    groupNameInput?.focus();
+
+    return;
+  }
+
+  if (participantIds.length < 2) {
+    showGroupCreationMessage(
+      "Sélectionne au moins deux participants."
+    );
+
+    return;
+  }
+
+  createGroupConversationButton.disabled =
+    true;
+
+  createGroupConversationButton.innerHTML = `
+    <i class="fa-solid fa-spinner fa-spin mr-2"></i>
+    Création du groupe...
+  `;
+
+  showGroupCreationMessage(
+    "Création du groupe...",
+    "success"
+  );
+
+  try {
+    const requestBody = {
+      type: "group",
+      name: groupName,
+      participantIds,
+    };
+
+    if (avatarUrl) {
+      requestBody.avatarUrl =
+        avatarUrl;
+    }
+
+    const response = await fetch(
+      `${API_URL}/conversations`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+        cache: "no-store",
+        body: JSON.stringify(
+          requestBody
+        ),
+      }
+    );
+
+    const result =
+      await response.json();
+
+    if (
+      !response.ok ||
+      !result.success
+    ) {
+      showGroupCreationMessage(
+        result.message ||
+          "Impossible de créer le groupe."
+      );
+
+      return;
+    }
+
+    showGroupCreationMessage(
+      "Groupe créé avec succès.",
+      "success"
+    );
+
+    closeNewConversationModal();
+
+    await loadConversations();
+  } catch (error) {
+    console.error(
+      "Erreur création du groupe :",
+      error
+    );
+
+    showGroupCreationMessage(
+      "Erreur réseau. Impossible de créer le groupe."
+    );
+  } finally {
+    createGroupConversationButton.disabled =
+      selectedGroupUserIds.size < 2;
+
+    createGroupConversationButton.innerHTML = `
+      <i class="fa-solid fa-user-group mr-2"></i>
+      Créer le groupe
+    `;
+  }
+}
+
+/* =========================================================
+   ONGLETS PRIVÉ / GROUPE
+========================================================= */
+
+function activatePrivateConversationTab() {
+  privateConversationSection?.classList.remove(
+    "hidden"
+  );
+
+  groupConversationSection?.classList.add(
+    "hidden"
+  );
+
+  privateConversationTab?.classList.remove(
+    "bg-slate-100",
+    "text-slate-700",
+    "dark:bg-slate-700"
+  );
+
+  privateConversationTab?.classList.add(
+    "bg-blue-600",
+    "text-white"
+  );
+
+  groupConversationTab?.classList.remove(
+    "bg-blue-600",
+    "text-white"
+  );
+
+  groupConversationTab?.classList.add(
+    "bg-slate-100",
+    "text-slate-700",
+    "dark:bg-slate-700",
+    "dark:text-white"
+  );
+}
+
+function activateGroupConversationTab() {
+  privateConversationSection?.classList.add(
+    "hidden"
+  );
+
+  groupConversationSection?.classList.remove(
+    "hidden"
+  );
+
+  groupConversationTab?.classList.remove(
+    "bg-slate-100",
+    "text-slate-700",
+    "dark:bg-slate-700"
+  );
+
+  groupConversationTab?.classList.add(
+    "bg-blue-600",
+    "text-white"
+  );
+
+  privateConversationTab?.classList.remove(
+    "bg-blue-600",
+    "text-white"
+  );
+
+  privateConversationTab?.classList.add(
+    "bg-slate-100",
+    "text-slate-700",
+    "dark:bg-slate-700",
+    "dark:text-white"
+  );
+
+  renderGroupUsers(
+    filterGroupUsers()
+  );
+}
+
+privateConversationTab
+  ?.addEventListener(
+    "click",
+    activatePrivateConversationTab
+  );
+
+groupConversationTab
+  ?.addEventListener(
+    "click",
+    activateGroupConversationTab
+  );
+
+/* =========================================================
+   MODALE
+========================================================= */
+
+function resetNewConversationModal() {
+  searchPrivateUser.value = "";
+  searchGroupUser.value = "";
+  groupNameInput.value = "";
+  groupAvatarUrlInput.value = "";
+
+  selectedGroupUserIds.clear();
+
+  updateSelectedGroupCount();
+
+  showGroupCreationMessage("");
+
+  activatePrivateConversationTab();
+}
+
+function openNewConversationModal() {
+  resetNewConversationModal();
+
+  newConversationModal?.classList.remove(
+    "hidden"
+  );
+
+  newConversationModal?.classList.add(
+    "flex"
+  );
 
   loadUsers();
 }
 
-function closeModal() {
-  modal?.classList.add("hidden");
-  modal?.classList.remove("flex");
+function closeNewConversationModal() {
+  newConversationModal?.classList.add(
+    "hidden"
+  );
+
+  newConversationModal?.classList.remove(
+    "flex"
+  );
 }
 
-openModalBtn?.addEventListener(
-  "click",
-  openModal
-);
+openNewConversationModalButton
+  ?.addEventListener(
+    "click",
+    openNewConversationModal
+  );
 
-closeModalBtn?.addEventListener(
-  "click",
-  closeModal
-);
+closeNewConversationModalButton
+  ?.addEventListener(
+    "click",
+    closeNewConversationModal
+  );
 
-modal?.addEventListener("click", (event) => {
-  if (event.target === modal) {
-    closeModal();
+newConversationModal?.addEventListener(
+  "click",
+  (event) => {
+    if (
+      event.target ===
+      newConversationModal
+    ) {
+      closeNewConversationModal();
+    }
   }
-});
+);
 
 /* =========================================================
-   RECHERCHE
+   RECHERCHES
 ========================================================= */
 
 searchConversation?.addEventListener(
   "input",
   () => {
-    const searchedValue =
+    const searchValue =
       searchConversation.value
         .trim()
         .toLowerCase();
@@ -859,9 +1445,11 @@ searchConversation?.addEventListener(
     const filteredConversations =
       conversations.filter(
         (conversation) =>
-          getConversationName(conversation)
+          getConversationName(
+            conversation
+          )
             .toLowerCase()
-            .includes(searchedValue)
+            .includes(searchValue)
       );
 
     renderConversations(
@@ -870,8 +1458,64 @@ searchConversation?.addEventListener(
   }
 );
 
+searchPrivateUser?.addEventListener(
+  "input",
+  () => {
+    const searchValue =
+      searchPrivateUser.value
+        .trim()
+        .toLowerCase();
+
+    const filteredUsers =
+      availableUsers.filter(
+        (user) => {
+          const fullName =
+            (
+              user.fullName ||
+              user.name ||
+              ""
+            ).toLowerCase();
+
+          const email =
+            (
+              user.email || ""
+            ).toLowerCase();
+
+          return (
+            fullName.includes(
+              searchValue
+            ) ||
+            email.includes(
+              searchValue
+            )
+          );
+        }
+      );
+
+    renderPrivateUsers(
+      filteredUsers
+    );
+  }
+);
+
+searchGroupUser?.addEventListener(
+  "input",
+  () => {
+    renderGroupUsers(
+      filterGroupUsers()
+    );
+  }
+);
+
+createGroupConversationButton
+  ?.addEventListener(
+    "click",
+    createGroupConversation
+  );
+
 /* =========================================================
    DÉMARRAGE
 ========================================================= */
 
+updateSelectedGroupCount();
 loadConversations();
