@@ -5,6 +5,8 @@ const messageInput = document.getElementById("messageInput");
 let selectedConversationId = null;
 let connectedUser = null;
 let replyingToMessage = null;
+let messagesRefreshInterval = null;
+let isRefreshingMessages = false;
 
 /* =========================================================
    OUTILS
@@ -776,17 +778,24 @@ function renderMessages(messages) {
 /* =========================================================
    CHARGEMENT DES MESSAGES
 ========================================================= */
-
-async function loadMessages(conversationId) {
+async function loadMessages(
+  conversationId,
+  showLoader = true
+) {
   selectedConversationId = conversationId;
+  if (!messagesRefreshInterval) {
+  startMessagesAutoRefresh();
+}
 
   if (!messagesContainer) return;
 
-  messagesContainer.innerHTML = `
-    <div class="flex h-full items-center justify-center text-slate-400">
-      Chargement des messages...
-    </div>
-  `;
+  if (showLoader) {
+    messagesContainer.innerHTML = `
+      <div class="flex h-full items-center justify-center text-slate-400">
+        Chargement des messages...
+      </div>
+    `;
+  }
 
   try {
     await loadConnectedUser();
@@ -803,14 +812,17 @@ async function loadMessages(conversationId) {
     const result = await response.json();
 
     if (!response.ok || !result.success) {
-      messagesContainer.innerHTML = `
-        <div class="flex h-full items-center justify-center text-red-500">
-          ${escapeHtml(
-            result.message ||
-              "Impossible de charger les messages."
-          )}
-        </div>
-      `;
+      if (showLoader) {
+        messagesContainer.innerHTML = `
+          <div class="flex h-full items-center justify-center text-red-500">
+            ${escapeHtml(
+              result.message ||
+                "Impossible de charger les messages."
+            )}
+          </div>
+        `;
+      }
+
       return;
     }
 
@@ -821,16 +833,73 @@ async function loadMessages(conversationId) {
       error
     );
 
-    messagesContainer.innerHTML = `
-      <div class="flex h-full items-center justify-center text-red-500">
-        Erreur réseau. Impossible de charger les messages.
-      </div>
-    `;
+    if (showLoader) {
+      messagesContainer.innerHTML = `
+        <div class="flex h-full items-center justify-center text-red-500">
+          Erreur réseau. Impossible de charger les messages.
+        </div>
+      `;
+    }
   }
 }
 
 window.loadMessages = loadMessages;
+/* =========================================================
+   ACTUALISATION AUTOMATIQUE DES MESSAGES
+========================================================= */
 
+function startMessagesAutoRefresh() {
+  if (messagesRefreshInterval) {
+    clearInterval(messagesRefreshInterval);
+  }
+
+  messagesRefreshInterval = setInterval(
+    async () => {
+      if (
+        !selectedConversationId ||
+        isRefreshingMessages ||
+        document.hidden
+      ) {
+        return;
+      }
+
+      isRefreshingMessages = true;
+
+      try {
+
+  await loadMessages(
+    selectedConversationId,
+    false
+  );
+
+  if (typeof window.loadConversations === "function") {
+    await window.loadConversations();
+  }
+
+} catch (error) {
+        console.error(
+          "Erreur actualisation automatique :",
+          error
+        );
+      } finally {
+        isRefreshingMessages = false;
+      }
+    },
+    3000
+  );
+}
+
+function stopMessagesAutoRefresh() {
+  if (messagesRefreshInterval) {
+    clearInterval(messagesRefreshInterval);
+    messagesRefreshInterval = null;
+  }
+}
+
+window.addEventListener(
+  "beforeunload",
+  stopMessagesAutoRefresh
+);
 /* =========================================================
    ENVOI D’UN MESSAGE
 ========================================================= */
