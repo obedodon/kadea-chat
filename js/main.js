@@ -473,3 +473,107 @@ document.addEventListener(
 );
 
 updateNotificationsDisplay();
+/* ==================================================
+   NAVIGATION RESPONSIVE
+================================================== */
+
+const responsiveBackButton =
+  document.getElementById("backToConversations");
+
+const responsiveChatPanel =
+  document.getElementById("chatPanel");
+
+const responsiveConversationPanel =
+  document.getElementById("conversationPanel");
+
+function isResponsiveSinglePanel() {
+  return window.innerWidth < 1024;
+}
+
+function openResponsiveChatView() {
+  if (!isResponsiveSinglePanel()) {
+    return;
+  }
+
+  document.body.classList.add(
+    "mobile-chat-open"
+  );
+
+  responsiveChatPanel?.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+  responsiveConversationPanel?.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+}
+
+function closeResponsiveChatView() {
+  document.body.classList.remove(
+    "mobile-chat-open"
+  );
+
+  responsiveChatPanel?.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+  responsiveConversationPanel?.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+  if (
+    typeof chatMenuElement !== "undefined"
+  ) {
+    chatMenuElement?.classList.add(
+      "hidden"
+    );
+  }
+}
+
+responsiveBackButton?.addEventListener(
+  "click",
+  closeResponsiveChatView
+);
+
+window.openResponsiveChat =
+  openResponsiveChatView;
+
+window.closeResponsiveChat =
+  closeResponsiveChatView;
+
+window.addEventListener(
+  "resize",
+  () => {
+    if (!isResponsiveSinglePanel()) {
+      document.body.classList.remove(
+        "mobile-chat-open"
+      );
+
+      responsiveChatPanel?.setAttribute(
+        "aria-hidden",
+        "false"
+      );
+
+      responsiveConversationPanel?.setAttribute(
+        "aria-hidden",
+        "false"
+      );
+    }
+  }
+);
+
+if (isResponsiveSinglePanel()) {
+  responsiveChatPanel?.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+  responsiveConversationPanel?.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+}

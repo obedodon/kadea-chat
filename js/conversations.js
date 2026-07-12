@@ -378,11 +378,6 @@ conversationAvatarModal?.addEventListener(
     }
   }
 );
-
-/* =========================================================
-   AFFICHAGE DES CONVERSATIONS
-========================================================= */
-
 function renderConversations(list) {
   if (!conversationsList) {
     return;
@@ -390,220 +385,254 @@ function renderConversations(list) {
 
   conversationsList.innerHTML = "";
 
-  if (
-    !Array.isArray(list) ||
-    list.length === 0
-  ) {
+  if (!Array.isArray(list) || list.length === 0) {
     conversationsList.innerHTML = `
       <p class="p-4 text-sm text-slate-500">
         Aucune conversation trouvée.
       </p>
     `;
-
     return;
   }
 
   const sortedConversations =
     sortConversationsByActivity(list);
 
-  sortedConversations.forEach(
-    (conversation) => {
-      const name =
-        getConversationName(conversation);
+  sortedConversations.forEach((conversation) => {
+    const name =
+      getConversationName(conversation);
 
-      const avatarUrl =
-        getConversationAvatar(conversation);
+    const avatarUrl =
+      getConversationAvatar(conversation);
 
-      const initials =
-        getInitials(name);
+    const initials =
+      getInitials(name);
 
-      const lastMessage =
-        getLastMessagePreview(conversation);
+    const lastMessage =
+      getLastMessagePreview(conversation);
 
-      const time =
-        getLastMessageTime(conversation);
+    const time =
+      getLastMessageTime(conversation);
 
-      const isActive =
-        activeConversationId ===
-        conversation.id;
+    const isActive =
+      activeConversationId === conversation.id;
 
-      const isGroup =
-        conversation.type === "group";
+    const isGroup =
+      conversation.type === "group";
 
-      const article =
-        document.createElement("article");
+    const article =
+      document.createElement("article");
 
-      article.className = `
-        conversation-item
-        cursor-pointer
-        border-b
-        border-slate-200
-        p-4
-        transition
-        hover:bg-slate-100
-        dark:border-slate-700
-        dark:hover:bg-slate-700
-        ${
-          isActive
-            ? "bg-blue-50 dark:bg-slate-700"
-            : "bg-white dark:bg-slate-800"
-        }
-      `;
+    article.className = `
+      conversation-item
+      cursor-pointer
+      border-b
+      border-slate-200
+      p-3
+      transition
+      hover:bg-slate-100
+      sm:p-4
+      dark:border-slate-700
+      dark:hover:bg-slate-700
+      ${
+        isActive
+          ? "bg-blue-50 dark:bg-slate-700"
+          : "bg-white dark:bg-slate-800"
+      }
+    `;
 
-      article.innerHTML = `
-        <div class="flex items-center gap-3">
+    article.innerHTML = `
+      <div class="flex items-center gap-3">
 
-          <button
-            type="button"
-            class="conversation-avatar relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-100 font-bold text-blue-700 transition hover:scale-110 hover:ring-4 hover:ring-blue-200"
-            aria-label="Voir la photo de ${escapeHtml(name)}"
-          >
-            ${
-              avatarUrl
-                ? `
-                  <img
-                    src="${escapeHtml(avatarUrl)}"
-                    alt="${escapeHtml(name)}"
-                    class="h-full w-full object-cover"
-                  >
-                `
-                : escapeHtml(initials)
-            }
-
-            ${
-              isGroup
-                ? `
-                  <span
-                    class="absolute bottom-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[8px] text-white"
-                  >
-                    <i class="fa-solid fa-user-group"></i>
-                  </span>
-                `
-                : ""
-            }
-          </button>
-
-          <div class="min-w-0 flex-1">
-
-            <div class="flex items-center justify-between gap-3">
-
-              <h3
-                class="truncate font-semibold text-slate-900 dark:text-white"
-              >
-                ${escapeHtml(name)}
-              </h3>
-
-              <span
-                class="shrink-0 text-xs text-blue-500 dark:text-blue-300"
-              >
-                ${escapeHtml(time)}
-              </span>
-
-            </div>
-
-            <p
-              class="mt-0.5 truncate text-sm text-slate-500 dark:text-slate-300"
-            >
-              ${escapeHtml(lastMessage)}
-            </p>
-
-          </div>
-
-        </div>
-      `;
-
-      const avatarButton =
-        article.querySelector(
-          ".conversation-avatar"
-        );
-
-      avatarButton?.addEventListener(
-        "click",
-        (event) => {
-          event.stopPropagation();
-
-          openConversationAvatar(
-            avatarUrl,
-            initials,
-            name
-          );
-        }
-      );
-
-      article.addEventListener(
-        "click",
-        () => {
-          activeConversationId =
-            conversation.id;
-
-          window.activeConversationId =
-            conversation.id;
-
-          const chatName =
-            document.getElementById(
-              "chatName"
-            );
-
-          const chatAvatar =
-            document.getElementById(
-              "chatAvatar"
-            );
-
-          const chatStatus =
-            document.getElementById(
-              "chatStatus"
-            );
-
-          if (chatName) {
-            chatName.textContent = name;
-          }
-
-          if (chatStatus) {
-            chatStatus.textContent = isGroup
-              ? `${
-                  conversation.participants
-                    ?.length || 0
-                } participant(s)`
-              : "● En ligne";
-          }
-
-          if (chatAvatar) {
-            if (avatarUrl) {
-              chatAvatar.innerHTML = `
+        <button
+          type="button"
+          class="
+            conversation-avatar
+            relative
+            flex
+            h-11
+            w-11
+            shrink-0
+            items-center
+            justify-center
+            overflow-hidden
+            rounded-full
+            bg-blue-100
+            font-bold
+            text-blue-700
+            transition
+            hover:scale-105
+            hover:ring-4
+            hover:ring-blue-200
+            sm:h-12
+            sm:w-12
+          "
+          aria-label="Voir la photo de ${escapeHtml(name)}"
+        >
+          ${
+            avatarUrl
+              ? `
                 <img
                   src="${escapeHtml(avatarUrl)}"
                   alt="${escapeHtml(name)}"
                   class="h-full w-full object-cover"
                 >
-              `;
-            } else {
-              chatAvatar.textContent =
-                initials;
-            }
+              `
+              : escapeHtml(initials)
           }
 
-          renderConversations(
-            conversations
-          );
-
-          if (
-            typeof window.loadMessages ===
-            "function"
-          ) {
-            window.loadMessages(
-              conversation.id
-            );
+          ${
+            isGroup
+              ? `
+                <span
+                  class="
+                    absolute
+                    bottom-0
+                    right-0
+                    flex
+                    h-4
+                    w-4
+                    items-center
+                    justify-center
+                    rounded-full
+                    bg-blue-600
+                    text-[8px]
+                    text-white
+                  "
+                >
+                  <i class="fa-solid fa-user-group"></i>
+                </span>
+              `
+              : ""
           }
+        </button>
+
+        <div class="min-w-0 flex-1">
+
+          <div class="flex items-center justify-between gap-2">
+
+            <h3
+              class="
+                truncate
+                text-sm
+                font-semibold
+                text-slate-900
+                sm:text-base
+                dark:text-white
+              "
+            >
+              ${escapeHtml(name)}
+            </h3>
+
+            <span
+              class="
+                shrink-0
+                text-[10px]
+                text-blue-500
+                sm:text-xs
+                dark:text-blue-300
+              "
+            >
+              ${escapeHtml(time)}
+            </span>
+
+          </div>
+
+          <p
+            class="
+              mt-0.5
+              truncate
+              text-xs
+              text-slate-500
+              sm:text-sm
+              dark:text-slate-300
+            "
+          >
+            ${escapeHtml(lastMessage)}
+          </p>
+
+        </div>
+
+      </div>
+    `;
+
+    const avatarButton =
+      article.querySelector(".conversation-avatar");
+
+    avatarButton?.addEventListener("click", (event) => {
+      event.stopPropagation();
+
+      openConversationAvatar(
+        avatarUrl,
+        initials,
+        name
+      );
+    });
+
+    article.addEventListener("click", () => {
+      activeConversationId =
+        conversation.id;
+
+      window.activeConversationId =
+        conversation.id;
+
+      // Responsive : ouvre le panneau du chat
+      // sur mobile et tablette.
+      if (
+        typeof window.openResponsiveChat ===
+        "function"
+      ) {
+        window.openResponsiveChat();
+      }
+
+      const chatName =
+        document.getElementById("chatName");
+
+      const chatAvatar =
+        document.getElementById("chatAvatar");
+
+      const chatStatus =
+        document.getElementById("chatStatus");
+
+      if (chatName) {
+        chatName.textContent = name;
+      }
+
+      if (chatStatus) {
+        chatStatus.textContent = isGroup
+          ? `${
+              conversation.participants?.length || 0
+            } participant(s)`
+          : "● En ligne";
+      }
+
+      if (chatAvatar) {
+        if (avatarUrl) {
+          chatAvatar.innerHTML = `
+            <img
+              src="${escapeHtml(avatarUrl)}"
+              alt="${escapeHtml(name)}"
+              class="h-full w-full object-cover"
+            >
+          `;
+        } else {
+          chatAvatar.innerHTML = "";
+          chatAvatar.textContent = initials;
         }
-      );
+      }
 
-      conversationsList.appendChild(
-        article
-      );
-    }
-  );
+      renderConversations(conversations);
+
+      if (
+        typeof window.loadMessages ===
+        "function"
+      ) {
+        window.loadMessages(conversation.id);
+      }
+    });
+
+    conversationsList.appendChild(article);
+  });
 }
-
 /* =========================================================
    CHARGEMENT DES CONVERSATIONS
 ========================================================= */

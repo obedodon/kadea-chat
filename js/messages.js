@@ -657,8 +657,14 @@ function renderMessages(messages) {
       <div
         class="
           ${isMine ? "message-sent" : "message-received"}
-          relative inline-flex w-fit max-w-[72%]
-          items-end gap-1.5 px-2.5 py-1.5 shadow-sm
+          relative inline-block
+          w-fit
+          max-w-[85%]
+          sm:max-w-[75%]
+          lg:max-w-[65%]
+          px-3
+          py-2
+          shadow-sm
           ${
             isMine
               ? "rounded-md rounded-tr-none bg-[#d9fdd3] text-slate-900"
@@ -685,7 +691,7 @@ function renderMessages(messages) {
               : ""
           }
 
-          <div class="flex items-baseline gap-1">
+          <div class="flex flex-wrap items-end gap-1">
             ${
               isPinned
                 ? `
@@ -709,8 +715,12 @@ function renderMessages(messages) {
 
             <p
               class="
-                whitespace-pre-wrap break-words
-                text-[13px] leading-[1.25rem]
+                 message-text
+              m-0
+              text-[13px]
+              leading-5
+              break-words
+              whitespace-pre-wrap
               "
             >
               ${escapeHtml(message.content)}
@@ -720,8 +730,11 @@ function renderMessages(messages) {
 
         <div
           class="
-            flex shrink-0 translate-y-[2px]
-            items-center gap-1
+            mt-1
+            flex
+            justify-end
+            items-center
+            gap-1
           "
         >
           <span class="text-[9px] text-slate-500">

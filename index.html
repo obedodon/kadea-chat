@@ -21,15 +21,277 @@
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
   />
+
+  <style>
+    html, body, #appLayout {
+      width: 100%;
+      height: 100%;
+    }
+
+    #appLayout, #conversationPanel, #chatPanel {
+      min-width: 0;
+    }
+
+    @media (max-width: 1023px) {
+      #appLayout {
+        position: relative;
+        height: 100dvh;
+        overflow: hidden;
+      }
+
+      #mainSidebar {
+        width: 56px;
+        min-width: 56px;
+        z-index: 30;
+      }
+
+      #conversationPanel,
+      #chatPanel {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 56px;
+        width: calc(100% - 56px);
+        max-width: none;
+        transition: transform 0.28s ease, opacity 0.28s ease;
+      }
+
+      #conversationPanel {
+        z-index: 10;
+        transform: translateX(0);
+        opacity: 1;
+      }
+
+      #chatPanel {
+        z-index: 20;
+        transform: translateX(100%);
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      body.mobile-chat-open #conversationPanel {
+        transform: translateX(-100%);
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      body.mobile-chat-open #chatPanel {
+        transform: translateX(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      #chatHeader {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      #chatHeaderActions {
+        gap: 2px;
+      }
+
+      #chatHeaderActions > button {
+        width: 36px;
+        height: 36px;
+      }
+
+      #messagesContainer {
+        padding: 12px;
+      }
+
+      #messageFooter {
+        padding: 8px;
+      }
+
+      .message-sent,
+      .message-received {
+        max-width: 84% !important;
+      }
+
+      #newConversationModal > div,
+      #settingsModal > div {
+        max-height: calc(100dvh - 24px);
+        overflow-y: auto;
+      }
+    }
+
+    @media (max-width: 479px) {
+      #mainSidebar {
+        width: 50px;
+        min-width: 50px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+      }
+
+      #mainSidebar .h-10.w-10 {
+        width: 36px;
+        height: 36px;
+      }
+
+      #conversationPanel,
+      #chatPanel {
+        left: 50px;
+        width: calc(100% - 50px);
+      }
+
+      #conversationHeader {
+        padding: 14px 12px;
+      }
+
+      #conversationTitle {
+        font-size: 18px;
+      }
+
+      #chatAvatar {
+        width: 36px;
+        height: 36px;
+        flex-shrink: 0;
+      }
+
+      #chatName {
+        max-width: 112px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+
+      #messagesContainer {
+        padding: 10px 8px;
+      }
+
+      #messageForm {
+        gap: 7px;
+      }
+
+      #messageInput {
+        min-width: 0;
+        padding: 9px 10px;
+        font-size: 14px;
+      }
+
+      #sendMessageButton {
+        width: 38px;
+        height: 38px;
+      }
+
+      .message-sent,
+      .message-received {
+        max-width: 90% !important;
+      }
+
+      #newConversationModal,
+      #settingsModal,
+      #uiModal {
+        padding: 10px;
+      }
+
+      #newConversationModal > div,
+      #settingsModal > div,
+      #uiModal > div {
+        padding: 16px;
+        border-radius: 14px;
+      }
+
+      .conversation-type-tab {
+        padding: 10px 6px;
+        font-size: 12px;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      #mainSidebar {
+        width: 64px;
+        min-width: 64px;
+      }
+
+      #conversationPanel {
+        position: relative;
+        width: 320px;
+        min-width: 280px;
+        max-width: 360px;
+      }
+
+      #chatPanel {
+        position: relative;
+        flex: 1;
+        transform: none;
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      #backToConversations {
+        display: none;
+      }
+
+      .message-sent,
+      .message-received {
+        max-width: 68% !important;
+      }
+    }
+
+    @media (min-width: 1440px) {
+      #conversationPanel {
+        width: 380px;
+        max-width: 400px;
+      }
+
+      .message-sent,
+      .message-received {
+        max-width: 60% !important;
+      }
+    }
+    /* Empêche tout débordement horizontal des messages */
+#messagesContainer {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+#messagesContainer > * {
+  max-width: 100%;
+}
+.message-sent,
+.message-received {
+  display: inline-block;
+  width: fit-content;
+  min-width: 0;
+  max-width: 84%;
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.message-sent *,
+.message-received * {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.message-text {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+  </style>
+
 </head>
 
 <body
-  class="h-screen overflow-hidden bg-slate-100 transition-colors dark:bg-slate-900"
+  class="h-screen overflow-hidden overflow-x-hidden bg-slate-100 transition-colors dark:bg-slate-900"
 >
-  <main class="flex h-screen">
+
+  <main
+  id="appLayout"
+  class="flex h-screen min-w-0 overflow-hidden overflow-x-hidden"
+>
 
     <!-- BARRE LATÉRALE -->
     <aside
+      id="mainSidebar"
       class="flex w-16 flex-col items-center justify-between border-r border-slate-200 bg-white py-4 transition-colors dark:border-slate-700 dark:bg-slate-900"
     >
       <div class="space-y-6">
@@ -69,12 +331,12 @@
           </a>
 
          <button
-  id="settingsBtn"
-  type="button"
-  title="Paramètres"
-  class="transition hover:scale-110 hover:text-blue-600"
+              id="settingsBtn"
+              type="button"
+              title="Paramètres"
+              class="transition hover:scale-110 hover:text-blue-600"
 >
-  <i class="fa-solid fa-gear"></i>
+       <i class="fa-solid fa-gear"></i>
 </button>
         </nav>
       </div>
@@ -90,15 +352,17 @@
     </aside>
 
     <!-- LISTE DES CONVERSATIONS -->
-    <section
-      class="flex w-80 flex-col border-r border-slate-200 bg-white transition-colors dark:border-slate-700 dark:bg-slate-800"
-    >
+   <section
+  id="conversationPanel"
+  class="flex flex-col border-r border-slate-200 bg-white transition-all duration-300 dark:border-slate-700 dark:bg-slate-900"
+>
       <div
+        id="conversationHeader"
         class="border-b border-slate-200 p-4 dark:border-slate-700"
       >
         <div class="mb-4 flex items-center justify-between">
           <div>
-            <h1 class="text-xl font-bold text-blue-600">
+            <h1 id="conversationTitle" class="text-xl font-bold text-blue-600">
               Kadea Chat
             </h1>
 
@@ -150,13 +414,26 @@
     </section>
 
     <!-- ZONE DE DISCUSSION -->
-    <section
-      class="flex flex-1 flex-col bg-slate-50 transition-colors dark:bg-slate-900"
-    >
+  <section
+  id="chatPanel"
+  class="flex min-w-0 flex-1 flex-col overflow-hidden bg-[#efeae2] transition-all duration-300 dark:bg-slate-900"
+>
+
       <header
-        class="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-6 transition-colors dark:border-slate-700 dark:bg-slate-800"
-      >
+  id="chatHeader"
+  class="flex h-16 shrink-0 items-center justify-between border-b border-[#ddd7cf] bg-[#efeae2] px-6 transition-colors dark:border-slate-700 dark:bg-slate-900"
+>
         <div class="flex items-center gap-3">
+
+  <button
+    id="backToConversations"
+    type="button"
+    title="Retour aux conversations"
+    aria-label="Retour aux conversations"
+    class="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-700 lg:hidden"
+  >
+    <i class="fa-solid fa-arrow-left"></i>
+  </button>
           <div
             id="chatAvatar"
             class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-blue-100 font-bold text-blue-700"
@@ -182,7 +459,8 @@
         </div>
 
         <div
-          class="relative flex items-center gap-3 text-slate-500 dark:text-slate-300"
+          id="chatHeaderActions"
+          class="relative flex shrink-0 items-center gap-3 text-slate-500 dark:text-slate-300"
         >
           <button
             id="videoCallBtn"
@@ -244,52 +522,53 @@
         </div>
       </header>
 
-      <!-- MESSAGES -->
-      <div
-        id="messagesContainer"
-        class="flex-1 space-y-2 overflow-y-auto bg-[#efeae2] px-6 py-4 dark:bg-slate-900"
-      >
+     <!-- MESSAGES -->
+<div
+  id="messagesContainer"
+  class="min-h-0 min-w-0 flex-1 space-y-2 overflow-y-auto overflow-x-hidden bg-[#efeae2] px-3 py-3 md:px-5 md:py-4 lg:px-6 dark:bg-slate-900"
+
+>
         <div
           class="flex h-full items-center justify-center text-slate-400"
         >
           Clique sur une conversation pour afficher les messages.
         </div>
       </div>
+<footer
+  id="messageFooter"
+  class="shrink-0 border-t border-[#ddd7cf] bg-[#efeae2] p-2 transition-colors dark:border-slate-700 dark:bg-slate-900 md:p-4"
+>
+  <form
+  id="messageForm"
+  class="flex min-w-0 items-center gap-2 md:gap-3"
+>
+    <button
+      id="emojiBtn"
+      type="button"
+      title="Ajouter un emoji"
+      class="shrink-0 text-slate-400 transition hover:scale-110 hover:text-blue-600"
+    >
+      <i class="fa-regular fa-face-smile text-lg md:text-xl"></i>
+    </button>
 
-      <!-- SAISIE DU MESSAGE -->
-      <footer
-        class="border-t border-slate-200 bg-white p-4 transition-colors dark:border-slate-700 dark:bg-slate-800"
-      >
-        <form
-          id="messageForm"
-          class="flex items-center gap-3"
-        >
-          <button
-            id="emojiBtn"
-            type="button"
-            title="Ajouter un emoji"
-            class="text-slate-400 transition hover:scale-110 hover:text-blue-600"
-          >
-            <i class="fa-regular fa-face-smile text-xl"></i>
-          </button>
+    <input
+      id="messageInput"
+      type="text"
+      placeholder="Écrire un message..."
+      autocomplete="off"
+      class="min-w-0 flex-1 rounded-lg bg-slate-100 px-3 py-2 text-sm outline-none transition focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white md:px-4 md:py-3 md:text-base"
+    />
 
-          <input
-            id="messageInput"
-            type="text"
-            placeholder="Écrire un message..."
-            autocomplete="off"
-            class="flex-1 rounded-lg bg-slate-100 px-4 py-3 outline-none transition focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
-          />
-
-          <button
-            type="submit"
-            title="Envoyer"
-            class="flex h-11 w-11 items-center justify-center rounded-full bg-blue-600 text-white transition hover:scale-110 hover:bg-blue-700"
-          >
-            <i class="fa-solid fa-paper-plane"></i>
-          </button>
-        </form>
-      </footer>
+    <button
+      id="sendMessageButton"
+      type="submit"
+      title="Envoyer"
+      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white transition hover:scale-110 hover:bg-blue-700 md:h-11 md:w-11"
+    >
+      <i class="fa-solid fa-paper-plane text-sm md:text-base"></i>
+    </button>
+  </form>
+</footer>
     </section>
   </main>
 
@@ -681,5 +960,6 @@
   <script src="js/main.js"></script>
   <script src="js/conversations.js"></script>
   <script src="js/messages.js"></script>
-</body>
+
+  </body>
 </html>
