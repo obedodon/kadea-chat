@@ -1,259 +1,235 @@
-/* ==================================================
-   PROTECTION DE LA PAGE
-================================================== */
+(() => {
+  "use strict";
 
-function protectPage() {
-  const token = localStorage.getItem("token");
+  /* ==================================================
+     OUTILS
+  ================================================== */
 
-  if (!token) {
-    window.location.href = "login.html";
+  const $ = (id) => document.getElementById(id);
+
+  const STORAGE_KEYS = Object.freeze({
+    TOKEN: "token",
+    USER: "user",
+    NOTIFICATIONS: "notificationsEnabled",
+  });
+
+  const elements = {
+    connectedUserName: $("connectedUserName"),
+
+    videoCallBtn: $("videoCallBtn"),
+    audioCallBtn: $("audioCallBtn"),
+
+    chatMenuBtn: $("chatMenuBtn"),
+    chatMenu: $("chatMenu"),
+    clearConversationBtn: $("clearConversationBtn"),
+
+    uiModal: $("uiModal"),
+    uiModalIcon: $("uiModalIcon"),
+    uiModalTitle: $("uiModalTitle"),
+    uiModalText: $("uiModalText"),
+    closeUiModal: $("closeUiModal"),
+
+    settingsBtn: $("settingsBtn"),
+    settingsModal: $("settingsModal"),
+    closeSettingsModal: $("closeSettingsModal"),
+
+    settingsThemeBtn: $("settingsThemeBtn"),
+    settingsThemeIcon: $("settingsThemeIcon"),
+    settingsThemeText: $("settingsThemeText"),
+
+    settingsNotificationsBtn: $("settingsNotificationsBtn"),
+    settingsNotificationsText: $("settingsNotificationsText"),
+    settingsNotificationsSwitch: $("settingsNotificationsSwitch"),
+    settingsNotificationsCircle: $("settingsNotificationsCircle"),
+
+    backToConversations: $("backToConversations"),
+    chatPanel: $("chatPanel"),
+    conversationPanel: $("conversationPanel"),
+
+    chatName: $("chatName"),
+    chatAvatar: $("chatAvatar"),
+    messagesContainer: $("messagesContainer"),
+    messageInput: $("messageInput"),
+  };
+
+  function showElement(element, displayClass = "flex") {
+    if (!element) return;
+
+    element.classList.remove("hidden");
+    element.classList.add(displayClass);
   }
-}
 
-function logout() {
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-  window.location.href = "login.html";
-}
+  function hideElement(element, displayClass = "flex") {
+    if (!element) return;
 
-protectPage();
+    element.classList.add("hidden");
+    element.classList.remove(displayClass);
+  }
 
-/* ==================================================
-   UTILISATEUR CONNECTÉ
-================================================== */
+  function getStoredUser() {
+    try {
+      const value = localStorage.getItem(STORAGE_KEYS.USER);
 
-function getConnectedUser() {
-  try {
-    const storedUser = localStorage.getItem("user");
+      if (!value || value === "undefined") {
+        return null;
+      }
 
-    if (!storedUser || storedUser === "undefined") {
+      return JSON.parse(value);
+    } catch (error) {
+      console.error(
+        "Impossible de lire l’utilisateur enregistré :",
+        error
+      );
+
       return null;
     }
-
-    return JSON.parse(storedUser);
-  } catch (error) {
-    console.error("Erreur utilisateur :", error);
-    return null;
-  }
-}
-
-function displayConnectedUser() {
-  const connectedUserNameElement =
-    document.getElementById("connectedUserName");
-
-  const user = getConnectedUser();
-
-  if (!connectedUserNameElement) {
-    return;
   }
 
-  connectedUserNameElement.textContent =
-    user?.fullName ||
-    user?.name ||
-    user?.username ||
-    "Utilisateur";
-}
+  function getConnectedUserName() {
+    const user = getStoredUser();
 
-displayConnectedUser();
-
-/* ==================================================
-   ÉLÉMENTS DE L’INTERFACE
-================================================== */
-
-const videoCallButton =
-  document.getElementById("videoCallBtn");
-
-const audioCallButton =
-  document.getElementById("audioCallBtn");
-
-const chatMenuButton =
-  document.getElementById("chatMenuBtn");
-
-const chatMenuElement =
-  document.getElementById("chatMenu");
-
-const clearConversationButton =
-  document.getElementById("clearConversationBtn");
-
-const interfaceModal =
-  document.getElementById("uiModal");
-
-const interfaceModalIcon =
-  document.getElementById("uiModalIcon");
-
-const interfaceModalTitle =
-  document.getElementById("uiModalTitle");
-
-const interfaceModalText =
-  document.getElementById("uiModalText");
-
-const closeInterfaceModalButton =
-  document.getElementById("closeUiModal");
-
-/* ==================================================
-   MODALE SIMPLE
-================================================== */
-
-function openUiModal(icon, title, text) {
-  if (!interfaceModal) {
-    return;
-  }
-
-  if (interfaceModalIcon) {
-    interfaceModalIcon.textContent = icon;
-  }
-
-  if (interfaceModalTitle) {
-    interfaceModalTitle.textContent = title;
-  }
-
-  if (interfaceModalText) {
-    interfaceModalText.textContent = text;
-  }
-
-  interfaceModal.classList.remove("hidden");
-  interfaceModal.classList.add("flex");
-}
-
-function closeUiModalBox() {
-  if (!interfaceModal) {
-    return;
-  }
-
-  interfaceModal.classList.add("hidden");
-  interfaceModal.classList.remove("flex");
-}
-
-closeInterfaceModalButton?.addEventListener(
-  "click",
-  closeUiModalBox
-);
-
-interfaceModal?.addEventListener("click", (event) => {
-  if (event.target === interfaceModal) {
-    closeUiModalBox();
-  }
-});
-
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
-    closeUiModalBox();
-    chatMenuElement?.classList.add("hidden");
-  }
-});
-
-/* ==================================================
-   APPELS
-================================================== */
-
-videoCallButton?.addEventListener("click", () => {
-  openUiModal(
-    "📹",
-    "Appel vidéo",
-    "Cette fonctionnalité sera disponible prochainement."
-  );
-});
-
-audioCallButton?.addEventListener("click", () => {
-  openUiModal(
-    "📞",
-    "Appel audio",
-    "Cette fonctionnalité sera disponible prochainement."
-  );
-});
-
-/* ==================================================
-   MENU TROIS POINTS
-================================================== */
-
-chatMenuButton?.addEventListener("click", (event) => {
-  event.stopPropagation();
-  chatMenuElement?.classList.toggle("hidden");
-});
-
-chatMenuElement?.addEventListener("click", (event) => {
-  event.stopPropagation();
-});
-
-document.addEventListener("click", () => {
-  chatMenuElement?.classList.add("hidden");
-});
-
-/* ==================================================
-   REMISE À ZÉRO APRÈS SUPPRESSION
-================================================== */
-
-function resetChatInterface() {
-  const chatNameElement =
-    document.getElementById("chatName");
-
-  const chatAvatarElement =
-    document.getElementById("chatAvatar");
-
-  const messagesAreaElement =
-    document.getElementById("messagesContainer");
-
-  const messageFieldElement =
-    document.getElementById("messageInput");
-
-  if (chatNameElement) {
-    chatNameElement.textContent =
-      "Sélectionne une conversation";
-  }
-
-  if (chatAvatarElement) {
-    chatAvatarElement.innerHTML = "";
-    chatAvatarElement.textContent = "KC";
-  }
-
-  if (messagesAreaElement) {
-    messagesAreaElement.innerHTML = `
-      <div class="h-full flex items-center justify-center text-slate-400">
-        Clique sur une conversation pour afficher les messages.
-      </div>
-    `;
-  }
-
-  if (messageFieldElement) {
-    messageFieldElement.value = "";
-  }
-
-  window.activeConversationId = null;
-
-  if (
-    typeof window.clearSelectedConversation === "function"
-  ) {
-    window.clearSelectedConversation();
-  }
-}
-
-/* ==================================================
-   SUPPRESSION D’UNE CONVERSATION
-================================================== */
-
-async function deleteSelectedConversation() {
-  const conversationId =
-    window.activeConversationId;
-
-  if (!conversationId) {
-    openUiModal(
-      "⚠️",
-      "Aucune conversation sélectionnée",
-      "Sélectionne d’abord une conversation."
+    return (
+      user?.fullName ||
+      user?.name ||
+      user?.username ||
+      "Utilisateur"
     );
-
-    return;
   }
 
-  const confirmation = window.confirm(
-    "Veux-tu vraiment supprimer cette conversation ?"
-  );
+  /* ==================================================
+     SESSION
+  ================================================== */
 
-  if (!confirmation) {
-    return;
+  function protectPage() {
+    const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
+
+    if (!token) {
+      window.location.replace("login.html");
+      return false;
+    }
+
+    return true;
   }
 
-  try {
+  function logout() {
+    localStorage.removeItem(STORAGE_KEYS.TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.USER);
+
+    window.location.replace("login.html");
+  }
+
+  function displayConnectedUser() {
+    if (!elements.connectedUserName) return;
+
+    elements.connectedUserName.textContent =
+      getConnectedUserName();
+  }
+
+  /* ==================================================
+     MODALE D’INFORMATION
+  ================================================== */
+
+  function openUiModal(icon, title, text) {
+    if (!elements.uiModal) return;
+
+    if (elements.uiModalIcon) {
+      elements.uiModalIcon.textContent = icon;
+    }
+
+    if (elements.uiModalTitle) {
+      elements.uiModalTitle.textContent = title;
+    }
+
+    if (elements.uiModalText) {
+      elements.uiModalText.textContent = text;
+    }
+
+    showElement(elements.uiModal);
+  }
+
+  function closeUiModal() {
+    hideElement(elements.uiModal);
+  }
+
+  /* ==================================================
+     APPELS SIMULÉS
+  ================================================== */
+
+  function simulateCall(type) {
+    const isVideo = type === "video";
+
+    openUiModal(
+      isVideo ? "📹" : "📞",
+      isVideo ? "Appel vidéo" : "Appel audio",
+      "Cette fonctionnalité sera disponible prochainement."
+    );
+  }
+
+  /* ==================================================
+     MENU DE CONVERSATION
+  ================================================== */
+
+  function toggleChatMenu(event) {
+    event?.stopPropagation();
+
+    elements.chatMenu?.classList.toggle("hidden");
+  }
+
+  function closeChatMenu() {
+    elements.chatMenu?.classList.add("hidden");
+  }
+
+  /* ==================================================
+     RÉINITIALISATION DU CHAT
+  ================================================== */
+
+  function resetChatInterface() {
+    if (elements.chatName) {
+      elements.chatName.textContent =
+        "Sélectionne une conversation";
+    }
+
+    if (elements.chatAvatar) {
+      elements.chatAvatar.innerHTML = "";
+      elements.chatAvatar.textContent = "KC";
+    }
+
+    if (elements.messagesContainer) {
+      elements.messagesContainer.innerHTML = `
+        <div
+          class="flex h-full items-center justify-center px-4 text-center text-slate-400"
+        >
+          Clique sur une conversation pour afficher les messages.
+        </div>
+      `;
+    }
+
+    if (elements.messageInput) {
+      elements.messageInput.value = "";
+    }
+
+    window.activeConversationId = null;
+
+    if (
+      typeof window.clearSelectedConversation === "function"
+    ) {
+      window.clearSelectedConversation();
+    }
+  }
+
+  /* ==================================================
+     SUPPRESSION D’UNE CONVERSATION
+  ================================================== */
+
+  async function deleteConversationRequest(conversationId) {
+    if (
+      typeof window.KadeaAPI?.delete === "function"
+    ) {
+      return window.KadeaAPI.delete(
+        `/conversations/${conversationId}`
+      );
+    }
+
     const response = await fetch(
       `${API_URL}/conversations/${conversationId}`,
       {
@@ -263,317 +239,439 @@ async function deleteSelectedConversation() {
       }
     );
 
-    const responseText = await response.text();
+    const result = await response
+      .json()
+      .catch(() => null);
 
-    let result = null;
-
-    if (responseText) {
-      try {
-        result = JSON.parse(responseText);
-      } catch {
-        result = null;
-      }
+    if (
+      response.status === 401 ||
+      response.status === 403
+    ) {
+      logout();
+      throw new Error("Ta session a expiré.");
     }
 
-    if (!response.ok) {
-      openUiModal(
-        "❌",
-        "Suppression impossible",
+    if (!response.ok || result?.success === false) {
+      throw new Error(
         result?.message ||
-          "Impossible de supprimer cette conversation."
+        "Impossible de supprimer cette conversation."
+      );
+    }
+
+    return result;
+  }
+
+  async function deleteSelectedConversation() {
+    const conversationId =
+      window.activeConversationId;
+
+    closeChatMenu();
+
+    if (!conversationId) {
+      openUiModal(
+        "⚠️",
+        "Aucune conversation sélectionnée",
+        "Sélectionne d’abord une conversation."
       );
 
       return;
     }
 
-    resetChatInterface();
+    const confirmed = window.confirm(
+      "Veux-tu vraiment supprimer cette conversation ?"
+    );
 
+    if (!confirmed) return;
+
+    if (elements.clearConversationBtn) {
+      elements.clearConversationBtn.disabled = true;
+    }
+
+    try {
+      await deleteConversationRequest(conversationId);
+
+      resetChatInterface();
+
+      if (
+        typeof window.loadConversations === "function"
+      ) {
+        await window.loadConversations();
+      }
+
+      openUiModal(
+        "✅",
+        "Conversation supprimée",
+        "La conversation a été supprimée avec succès."
+      );
+    } catch (error) {
+      console.error(
+        "Erreur lors de la suppression :",
+        error
+      );
+
+      openUiModal(
+        "❌",
+        "Suppression impossible",
+        error.message ||
+          "Une erreur est survenue pendant la suppression."
+      );
+    } finally {
+      if (elements.clearConversationBtn) {
+        elements.clearConversationBtn.disabled = false;
+      }
+    }
+  }
+
+  /* ==================================================
+     PARAMÈTRES
+  ================================================== */
+
+  function getCurrentTheme() {
     if (
-      typeof window.loadConversations === "function"
+      typeof window.KadeaTheme?.current === "function"
     ) {
-      await window.loadConversations();
+      return window.KadeaTheme.current();
     }
 
-    openUiModal(
-      "✅",
-      "Conversation supprimée",
-      "La conversation a été supprimée."
-    );
-  } catch (error) {
-    console.error("Erreur suppression :", error);
-
-    openUiModal(
-      "❌",
-      "Erreur réseau",
-      "Impossible de supprimer la conversation."
-    );
-  }
-}
-
-clearConversationButton?.addEventListener(
-  "click",
-  async () => {
-    chatMenuElement?.classList.add("hidden");
-    await deleteSelectedConversation();
-  }
-);
-/* ==================================================
-   PARAMÈTRES
-================================================== */
-
-const settingsButton =
-  document.getElementById("settingsBtn");
-
-const settingsModal =
-  document.getElementById("settingsModal");
-
-const closeSettingsModalButton =
-  document.getElementById("closeSettingsModal");
-
-const settingsThemeButton =
-  document.getElementById("settingsThemeBtn");
-
-const settingsThemeIcon =
-  document.getElementById("settingsThemeIcon");
-
-const settingsThemeText =
-  document.getElementById("settingsThemeText");
-
-const settingsNotificationsButton =
-  document.getElementById("settingsNotificationsBtn");
-
-const settingsNotificationsText =
-  document.getElementById("settingsNotificationsText");
-
-const settingsNotificationsSwitch =
-  document.getElementById("settingsNotificationsSwitch");
-
-const settingsNotificationsCircle =
-  document.getElementById("settingsNotificationsCircle");
-
-function openSettingsModal() {
-  settingsModal?.classList.remove("hidden");
-  settingsModal?.classList.add("flex");
-
-  updateSettingsThemeDisplay();
-  updateNotificationsDisplay();
-}
-
-function closeSettingsModalBox() {
-  settingsModal?.classList.add("hidden");
-  settingsModal?.classList.remove("flex");
-}
-
-function updateSettingsThemeDisplay() {
-  const isDark =
-    document.body.classList.contains("dark-mode");
-
-  if (settingsThemeIcon) {
-    settingsThemeIcon.className = isDark
-      ? "fa-solid fa-sun"
-      : "fa-solid fa-moon";
+    return document.documentElement.classList.contains(
+      "dark"
+    )
+      ? "dark"
+      : "light";
   }
 
-  if (settingsThemeText) {
-    settingsThemeText.textContent = isDark
-      ? "Passer en mode clair"
-      : "Passer en mode sombre";
+  function updateSettingsThemeDisplay() {
+    const isDark = getCurrentTheme() === "dark";
+
+    if (elements.settingsThemeIcon) {
+      elements.settingsThemeIcon.className = isDark
+        ? "fa-solid fa-sun"
+        : "fa-solid fa-moon";
+    }
+
+    if (elements.settingsThemeText) {
+      elements.settingsThemeText.textContent = isDark
+        ? "Passer en mode clair"
+        : "Passer en mode sombre";
+    }
   }
-}
 
-function toggleSettingsTheme() {
-  const mainThemeButton =
-    document.getElementById("themeToggle");
+  function toggleSettingsTheme() {
+    if (
+      typeof window.KadeaTheme?.toggle === "function"
+    ) {
+      window.KadeaTheme.toggle();
+    } else {
+      document.documentElement.classList.toggle(
+        "dark"
+      );
+    }
 
-  mainThemeButton?.click();
-
-  setTimeout(() => {
     updateSettingsThemeDisplay();
-  }, 50);
-}
-
-function getNotificationsEnabled() {
-  const savedValue =
-    localStorage.getItem("notificationsEnabled");
-
-  return savedValue !== "false";
-}
-
-function updateNotificationsDisplay() {
-  const enabled =
-    getNotificationsEnabled();
-
-  if (settingsNotificationsText) {
-    settingsNotificationsText.textContent = enabled
-      ? "Activées"
-      : "Désactivées";
   }
 
-  if (settingsNotificationsSwitch) {
-    settingsNotificationsSwitch.className = enabled
-      ? "relative h-6 w-11 rounded-full bg-blue-600 transition"
-      : "relative h-6 w-11 rounded-full bg-slate-400 transition";
-  }
-
-  if (settingsNotificationsCircle) {
-    settingsNotificationsCircle.className = enabled
-      ? "absolute right-1 top-1 h-4 w-4 rounded-full bg-white transition"
-      : "absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition";
-  }
-}
-
-function toggleNotifications() {
-  const nextValue =
-    !getNotificationsEnabled();
-
-  localStorage.setItem(
-    "notificationsEnabled",
-    String(nextValue)
-  );
-
-  updateNotificationsDisplay();
-}
-
-settingsButton?.addEventListener(
-  "click",
-  openSettingsModal
-);
-
-closeSettingsModalButton?.addEventListener(
-  "click",
-  closeSettingsModalBox
-);
-
-settingsThemeButton?.addEventListener(
-  "click",
-  toggleSettingsTheme
-);
-
-settingsNotificationsButton?.addEventListener(
-  "click",
-  toggleNotifications
-);
-
-settingsModal?.addEventListener(
-  "click",
-  (event) => {
-    if (event.target === settingsModal) {
-      closeSettingsModalBox();
-    }
-  }
-);
-
-document.addEventListener(
-  "keydown",
-  (event) => {
-    if (event.key === "Escape") {
-      closeSettingsModalBox();
-    }
-  }
-);
-
-updateNotificationsDisplay();
-/* ==================================================
-   NAVIGATION RESPONSIVE
-================================================== */
-
-const responsiveBackButton =
-  document.getElementById("backToConversations");
-
-const responsiveChatPanel =
-  document.getElementById("chatPanel");
-
-const responsiveConversationPanel =
-  document.getElementById("conversationPanel");
-
-function isResponsiveSinglePanel() {
-  return window.innerWidth < 1024;
-}
-
-function openResponsiveChatView() {
-  if (!isResponsiveSinglePanel()) {
-    return;
-  }
-
-  document.body.classList.add(
-    "mobile-chat-open"
-  );
-
-  responsiveChatPanel?.setAttribute(
-    "aria-hidden",
-    "false"
-  );
-
-  responsiveConversationPanel?.setAttribute(
-    "aria-hidden",
-    "true"
-  );
-}
-
-function closeResponsiveChatView() {
-  document.body.classList.remove(
-    "mobile-chat-open"
-  );
-
-  responsiveChatPanel?.setAttribute(
-    "aria-hidden",
-    "true"
-  );
-
-  responsiveConversationPanel?.setAttribute(
-    "aria-hidden",
-    "false"
-  );
-
-  if (
-    typeof chatMenuElement !== "undefined"
-  ) {
-    chatMenuElement?.classList.add(
-      "hidden"
+  function getNotificationsEnabled() {
+    return (
+      localStorage.getItem(
+        STORAGE_KEYS.NOTIFICATIONS
+      ) !== "false"
     );
   }
-}
 
-responsiveBackButton?.addEventListener(
-  "click",
-  closeResponsiveChatView
-);
+  function updateNotificationsDisplay() {
+    const enabled = getNotificationsEnabled();
 
-window.openResponsiveChat =
-  openResponsiveChatView;
+    if (elements.settingsNotificationsText) {
+      elements.settingsNotificationsText.textContent =
+        enabled ? "Activées" : "Désactivées";
+    }
 
-window.closeResponsiveChat =
-  closeResponsiveChatView;
+    if (elements.settingsNotificationsSwitch) {
+      elements.settingsNotificationsSwitch.className =
+        enabled
+          ? "relative h-6 w-11 rounded-full bg-blue-600 transition"
+          : "relative h-6 w-11 rounded-full bg-slate-400 transition";
+    }
 
-window.addEventListener(
-  "resize",
-  () => {
-    if (!isResponsiveSinglePanel()) {
+    if (elements.settingsNotificationsCircle) {
+      elements.settingsNotificationsCircle.className =
+        enabled
+          ? "absolute right-1 top-1 h-4 w-4 rounded-full bg-white transition"
+          : "absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition";
+    }
+
+    elements.settingsNotificationsBtn?.setAttribute(
+      "aria-pressed",
+      String(enabled)
+    );
+  }
+
+  function toggleNotifications() {
+    const nextValue = !getNotificationsEnabled();
+
+    localStorage.setItem(
+      STORAGE_KEYS.NOTIFICATIONS,
+      String(nextValue)
+    );
+
+    updateNotificationsDisplay();
+  }
+
+  function openSettingsModal() {
+    showElement(elements.settingsModal);
+
+    updateSettingsThemeDisplay();
+    updateNotificationsDisplay();
+  }
+
+  function closeSettingsModal() {
+    hideElement(elements.settingsModal);
+  }
+
+  /* ==================================================
+     RESPONSIVE
+  ================================================== */
+
+  function isSinglePanelMode() {
+    return window.innerWidth < 1024;
+  }
+
+  function openResponsiveChatView() {
+    if (!isSinglePanelMode()) return;
+
+    document.body.classList.add(
+      "mobile-chat-open"
+    );
+
+    elements.chatPanel?.setAttribute(
+      "aria-hidden",
+      "false"
+    );
+
+    elements.conversationPanel?.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+  }
+
+  function closeResponsiveChatView() {
+    document.body.classList.remove(
+      "mobile-chat-open"
+    );
+
+    elements.chatPanel?.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    elements.conversationPanel?.setAttribute(
+      "aria-hidden",
+      "false"
+    );
+
+    closeChatMenu();
+  }
+
+  function updateResponsiveLayout() {
+    const isMobile = isSinglePanelMode();
+    const chatIsOpen =
+      document.body.classList.contains(
+        "mobile-chat-open"
+      );
+
+    if (!isMobile) {
       document.body.classList.remove(
         "mobile-chat-open"
       );
 
-      responsiveChatPanel?.setAttribute(
+      elements.chatPanel?.setAttribute(
         "aria-hidden",
         "false"
       );
 
-      responsiveConversationPanel?.setAttribute(
+      elements.conversationPanel?.setAttribute(
         "aria-hidden",
         "false"
       );
+
+      return;
+    }
+
+    elements.chatPanel?.setAttribute(
+      "aria-hidden",
+      chatIsOpen ? "false" : "true"
+    );
+
+    elements.conversationPanel?.setAttribute(
+      "aria-hidden",
+      chatIsOpen ? "true" : "false"
+    );
+  }
+
+  /* ==================================================
+     GESTION GLOBALE DES FERMETURES
+  ================================================== */
+
+  function handleDocumentClick(event) {
+    if (
+      elements.chatMenu &&
+      !elements.chatMenu.contains(event.target) &&
+      !elements.chatMenuBtn?.contains(event.target)
+    ) {
+      closeChatMenu();
     }
   }
-);
 
-if (isResponsiveSinglePanel()) {
-  responsiveChatPanel?.setAttribute(
-    "aria-hidden",
-    "true"
-  );
+  function handleOverlayClick(event) {
+    if (event.target === elements.uiModal) {
+      closeUiModal();
+    }
 
-  responsiveConversationPanel?.setAttribute(
-    "aria-hidden",
-    "false"
-  );
-}
+    if (event.target === elements.settingsModal) {
+      closeSettingsModal();
+    }
+  }
+
+  function handleEscapeKey(event) {
+    if (event.key !== "Escape") return;
+
+    closeUiModal();
+    closeSettingsModal();
+    closeChatMenu();
+  }
+
+  /* ==================================================
+     ÉVÉNEMENTS
+  ================================================== */
+
+  function bindEvents() {
+    elements.closeUiModal?.addEventListener(
+      "click",
+      closeUiModal
+    );
+
+    elements.uiModal?.addEventListener(
+      "click",
+      handleOverlayClick
+    );
+
+    elements.videoCallBtn?.addEventListener(
+      "click",
+      () => simulateCall("video")
+    );
+
+    elements.audioCallBtn?.addEventListener(
+      "click",
+      () => simulateCall("audio")
+    );
+
+    elements.chatMenuBtn?.addEventListener(
+      "click",
+      toggleChatMenu
+    );
+
+    elements.chatMenu?.addEventListener(
+      "click",
+      (event) => event.stopPropagation()
+    );
+
+    elements.clearConversationBtn?.addEventListener(
+      "click",
+      deleteSelectedConversation
+    );
+
+    elements.settingsBtn?.addEventListener(
+      "click",
+      openSettingsModal
+    );
+
+    elements.closeSettingsModal?.addEventListener(
+      "click",
+      closeSettingsModal
+    );
+
+    elements.settingsModal?.addEventListener(
+      "click",
+      handleOverlayClick
+    );
+
+    elements.settingsThemeBtn?.addEventListener(
+      "click",
+      toggleSettingsTheme
+    );
+
+    elements.settingsNotificationsBtn?.addEventListener(
+      "click",
+      toggleNotifications
+    );
+
+    elements.backToConversations?.addEventListener(
+      "click",
+      closeResponsiveChatView
+    );
+
+    document.addEventListener(
+      "click",
+      handleDocumentClick
+    );
+
+    document.addEventListener(
+      "keydown",
+      handleEscapeKey
+    );
+
+    window.addEventListener(
+      "resize",
+      updateResponsiveLayout
+    );
+
+    window.addEventListener(
+      "kadea:themechange",
+      updateSettingsThemeDisplay
+    );
+  }
+
+  /* ==================================================
+     INITIALISATION
+  ================================================== */
+
+  function initialize() {
+    if (!protectPage()) return;
+
+    displayConnectedUser();
+    updateNotificationsDisplay();
+    updateSettingsThemeDisplay();
+    updateResponsiveLayout();
+    bindEvents();
+  }
+
+  window.MainApp = Object.freeze({
+    logout,
+    openUiModal,
+    closeUiModal,
+    resetChatInterface,
+    deleteSelectedConversation,
+    openSettingsModal,
+    closeSettingsModal,
+    openResponsiveChatView,
+    closeResponsiveChatView,
+  });
+
+  window.logout = logout;
+  window.openResponsiveChat =
+    openResponsiveChatView;
+  window.closeResponsiveChat =
+    closeResponsiveChatView;
+
+  if (document.readyState === "loading") {
+    document.addEventListener(
+      "DOMContentLoaded",
+      initialize,
+      {
+        once: true,
+      }
+    );
+  } else {
+    initialize();
+  }
+})();

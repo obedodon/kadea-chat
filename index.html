@@ -7,15 +7,30 @@
     content="width=device-width, initial-scale=1.0"
   />
 
-  <title>Chat - Kadea Chat</title>
+  <title>Discussions — Kadea Chat</title>
+
+  <!-- Applique le thème avant l’affichage pour éviter un flash visuel -->
+  <script>
+    (() => {
+      const savedTheme = localStorage.getItem("theme");
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+
+      document.documentElement.classList.toggle(
+        "dark",
+        savedTheme === "dark" || (!savedTheme && prefersDark)
+      );
+    })();
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
 
   <script>
     tailwind.config = {
       darkMode: "class",
     };
   </script>
-
-  <script src="https://cdn.tailwindcss.com"></script>
 
   <link
     rel="stylesheet"
@@ -345,6 +360,7 @@
         type="button"
         onclick="logout()"
         title="Se déconnecter"
+        aria-label="Se déconnecter"
         class="text-red-500 transition hover:scale-110 hover:text-red-600"
       >
         <i class="fa-solid fa-right-from-bracket"></i>
@@ -451,9 +467,9 @@
 
             <p
               id="chatStatus"
-              class="text-xs text-green-600"
+              class="text-xs text-slate-400 dark:text-slate-500"
             >
-              ● En ligne
+              Aucune conversation ouverte
             </p>
           </div>
         </div>
@@ -513,6 +529,7 @@
             <button
               type="button"
               onclick="logout()"
+              aria-label="Se déconnecter"
               class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-red-600 transition hover:bg-red-50 dark:hover:bg-red-950/30"
             >
               <i class="fa-solid fa-right-from-bracket"></i>
@@ -928,6 +945,7 @@
       <button
         type="button"
         onclick="logout()"
+        aria-label="Se déconnecter"
         class="flex w-full items-center justify-between rounded-xl bg-red-50 px-4 py-4 text-left text-red-600 transition hover:bg-red-100 dark:bg-red-950/30 dark:hover:bg-red-950/50"
       >
         <div class="flex items-center gap-3">
@@ -961,5 +979,5 @@
   <script src="js/conversations.js"></script>
   <script src="js/messages.js"></script>
 
-  </body>
+</body>
 </html>

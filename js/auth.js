@@ -1,151 +1,462 @@
-const registerForm = document.getElementById("registerForm");
-const loginForm = document.getElementById("loginForm");
+"use strict";
 
-function showMessage(elementId, text, type = "error") {
-  const message = document.getElementById(elementId);
-  if (!message) return;
+(() => {
+  const $ = (selector) =>
+    document.querySelector(selector);
 
-  message.textContent = text;
-  message.className =
-    type === "success"
-      ? "text-sm text-center font-medium text-green-600"
-      : "text-sm text-center font-medium text-red-600";
-}
-
-function isValidEmail(email) {
-  return email.includes("@") && email.includes(".");
-}
-
-function holdToShowPassword(inputId, buttonId) {
-  const input = document.getElementById(inputId);
-  const button = document.getElementById(buttonId);
-
-  if (!input || !button) return;
-
-  const showPassword = () => {
-    input.type = "text";
-  };
-
-  const hidePassword = () => {
-    input.type = "password";
-  };
-
-  button.addEventListener("mousedown", showPassword);
-  button.addEventListener("mouseup", hidePassword);
-  button.addEventListener("mouseleave", hidePassword);
-  button.addEventListener("touchstart", showPassword);
-  button.addEventListener("touchend", hidePassword);
-}
-
-holdToShowPassword("password", "togglePassword");
-holdToShowPassword("confirmPassword", "toggleConfirmPassword");
-holdToShowPassword("loginPassword", "toggleLoginPassword");
-
-if (registerForm) {
-  registerForm.addEventListener("submit", async function (event) {
-    event.preventDefault();
-
-    const fullName = document.getElementById("fullName").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
-    const confirmPassword = document.getElementById("confirmPassword").value;
-
-    showMessage("message", "");
-
-    if (!fullName || !email || !password || !confirmPassword) {
-      showMessage("message", "Veuillez remplir tous les champs.");
+  function showMessage(
+    element,
+    message,
+    type = "error"
+  ) {
+    if (!element) {
       return;
     }
 
-    if (!isValidEmail(email)) {
-      showMessage("message", "Adresse email invalide.");
+    element.textContent = message;
+
+    element.className =
+      type === "success"
+        ? "text-sm text-center font-medium text-green-600"
+        : "text-sm text-center font-medium text-red-600";
+  }
+
+  function setSubmitting(
+    form,
+    isSubmitting,
+    loadingText
+  ) {
+    const submitButton =
+      form?.querySelector(
+        'button[type="submit"]'
+      );
+
+    if (!submitButton) {
       return;
     }
 
-    if (password.length < 6) {
-      showMessage("message", "Le mot de passe doit contenir au moins 6 caractères.");
+    if (
+      !submitButton.dataset.originalText
+    ) {
+      submitButton.dataset.originalText =
+        submitButton.innerHTML;
+    }
+
+    submitButton.disabled =
+      isSubmitting;
+
+    submitButton.classList.toggle(
+      "cursor-not-allowed",
+      isSubmitting
+    );
+
+    submitButton.classList.toggle(
+      "opacity-70",
+      isSubmitting
+    );
+
+    submitButton.innerHTML =
+      isSubmitting
+        ? `
+          <i class="fa-solid fa-spinner fa-spin mr-2"></i>
+          ${loadingText}
+        `
+        : submitButton.dataset.originalText;
+  }
+
+  function bindPasswordVisibility(
+    buttonId,
+    inputId
+  ) {
+    const button =
+      document.getElementById(buttonId);
+
+    const input =
+      document.getElementById(inputId);
+
+    if (!button || !input) {
       return;
     }
 
-    if (password !== confirmPassword) {
-      showMessage("message", "Les mots de passe ne correspondent pas.");
-      return;
+    const showPassword = (
+      event
+    ) => {
+      event.preventDefault();
+
+      input.type = "text";
+
+      button.setAttribute(
+        "aria-label",
+        "Masquer le mot de passe"
+      );
+
+      const icon =
+        button.querySelector("i");
+
+      if (icon) {
+        icon.className =
+          "fa-solid fa-eye-slash";
+      }
+    };
+
+    const hidePassword = (
+      event
+    ) => {
+      event?.preventDefault();
+
+      input.type = "password";
+
+      button.setAttribute(
+        "aria-label",
+        "Afficher le mot de passe"
+      );
+
+      const icon =
+        button.querySelector("i");
+
+      if (icon) {
+        icon.className =
+          "fa-solid fa-eye";
+      }
+    };
+
+    button.addEventListener(
+      "pointerdown",
+      showPassword
+    );
+
+    button.addEventListener(
+      "pointerup",
+      hidePassword
+    );
+
+    button.addEventListener(
+      "pointerleave",
+      hidePassword
+    );
+
+    button.addEventListener(
+      "pointercancel",
+      hidePassword
+    );
+
+    button.addEventListener(
+      "keydown",
+      (event) => {
+        if (
+          event.key === " " ||
+          event.key === "Enter"
+        ) {
+          showPassword(event);
+        }
+      }
+    );
+
+    button.addEventListener(
+      "keyup",
+      hidePassword
+    );
+  }
+
+  function normalizeAuthResponse(
+    result
+  ) {
+    const data =
+      result?.data || {};
+
+    return {
+      token:
+        data.token ||
+        data.accessToken ||
+        result?.token ||
+        null,
+
+      user:
+        data.user ||
+        data.profile ||
+        null,
+    };
+  }
+
+  function saveSession(result) {
+    const {
+      token,
+      user,
+    } = normalizeAuthResponse(
+      result
+    );
+
+    if (!token) {
+      throw new Error(
+        "Le serveur n’a renvoyé aucun jeton de connexion."
+      );
     }
 
-    try {
-      showMessage("message", "Création du compte en cours...", "success");
+    localStorage.setItem(
+      "token",
+      token
+    );
 
-      const response = await fetch(`${API_URL}/auth/register`, {
-        method: "POST",
-        headers: getPublicHeaders(),
-        body: JSON.stringify({ fullName, email, password }),
-      });
+    if (user) {
+      localStorage.setItem(
+        "user",
+        JSON.stringify(user)
+      );
+    }
+  }
 
-      const result = await response.json();
+  async function publicRequest(
+    endpoint,
+    payload
+  ) {
+    if (
+      window.KadeaAPI?.post
+    ) {
+      return window.KadeaAPI.post(
+        endpoint,
+        payload,
+        {
+          auth: false,
+        }
+      );
+    }
 
-      if (!response.ok || !result.success) {
-        showMessage("message", result.message || "Erreur lors de l'inscription.");
+    const response =
+      await fetch(
+        `${API_URL}${endpoint}`,
+        {
+          method: "POST",
+
+          headers:
+            getPublicHeaders(),
+
+          body:
+            JSON.stringify(
+              payload
+            ),
+
+          cache: "no-store",
+        }
+      );
+
+    const result =
+      await response
+        .json()
+        .catch(() => null);
+
+    if (
+      !response.ok ||
+      !result?.success
+    ) {
+      throw new Error(
+        result?.message ||
+        "La requête a échoué."
+      );
+    }
+
+    return result;
+  }
+
+  const loginForm =
+    $("#loginForm");
+
+  loginForm?.addEventListener(
+    "submit",
+    async (event) => {
+      event.preventDefault();
+
+      const email =
+        $("#loginEmail")
+          ?.value
+          .trim() || "";
+
+      const password =
+        $("#loginPassword")
+          ?.value || "";
+
+      const message =
+        $("#loginMessage");
+
+      if (
+        !email ||
+        !password
+      ) {
+        showMessage(
+          message,
+          "Renseigne ton adresse e-mail et ton mot de passe."
+        );
+
         return;
       }
 
-      showMessage("message", "Compte créé avec succès ! Redirection...", "success");
+      setSubmitting(
+        loginForm,
+        true,
+        "Connexion..."
+      );
 
-      setTimeout(() => {
-        window.location.href = "login.html";
-      }, 1500);
-    } catch (error) {
-      showMessage("message", "Erreur réseau. Vérifie ta connexion internet.");
-      console.error(error);
+      showMessage(
+        message,
+        "Connexion en cours...",
+        "success"
+      );
+
+      try {
+        const result =
+          await publicRequest(
+            "/auth/login",
+            {
+              email,
+              password,
+            }
+          );
+
+        saveSession(result);
+
+        window.location.href =
+          "index.html";
+      } catch (error) {
+        showMessage(
+          message,
+          error.message ||
+          "Connexion impossible."
+        );
+      } finally {
+        setSubmitting(
+          loginForm,
+          false,
+          "Connexion..."
+        );
+      }
     }
-  });
-}
+  );
 
-if (loginForm) {
-  loginForm.addEventListener("submit", async function (event) {
-    event.preventDefault();
+  const registerForm =
+    $("#registerForm");
 
-    const email = document.getElementById("loginEmail").value.trim();
-    const password = document.getElementById("loginPassword").value;
+  registerForm?.addEventListener(
+    "submit",
+    async (event) => {
+      event.preventDefault();
 
-    showMessage("loginMessage", "");
+      const fullName =
+        $("#fullName")
+          ?.value
+          .trim() || "";
 
-    if (!email || !password) {
-      showMessage("loginMessage", "Veuillez remplir tous les champs.");
-      return;
-    }
+      const email =
+        $("#email")
+          ?.value
+          .trim() || "";
 
-    if (!isValidEmail(email)) {
-      showMessage("loginMessage", "Adresse email invalide.");
-      return;
-    }
+      const password =
+        $("#password")
+          ?.value || "";
 
-    try {
-      showMessage("loginMessage", "Connexion en cours...", "success");
+      const confirmPassword =
+        $("#confirmPassword")
+          ?.value || "";
 
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
-        headers: getPublicHeaders(),
-        body: JSON.stringify({ email, password }),
-      });
+      const message =
+        $("#message");
 
-      const result = await response.json();
+      if (
+        !fullName ||
+        !email ||
+        !password ||
+        !confirmPassword
+      ) {
+        showMessage(
+          message,
+          "Tous les champs sont obligatoires."
+        );
 
-      if (!response.ok || !result.success) {
-        showMessage("loginMessage", result.message || "Email ou mot de passe incorrect.");
         return;
       }
 
-      localStorage.setItem("token", result.data.token);
-      localStorage.setItem("user", JSON.stringify(result.data.user));
+      if (
+        password.length < 8
+      ) {
+        showMessage(
+          message,
+          "Le mot de passe doit contenir au moins 8 caractères."
+        );
 
-      showMessage("loginMessage", "Connexion réussie ! Redirection...", "success");
+        return;
+      }
 
-      setTimeout(() => {
-        window.location.href = "index.html";
-      }, 1000);
-    } catch (error) {
-      showMessage("loginMessage", "Erreur réseau. Vérifie ta connexion internet.");
-      console.error(error);
+      if (
+        password !==
+        confirmPassword
+      ) {
+        showMessage(
+          message,
+          "Les mots de passe ne correspondent pas."
+        );
+
+        return;
+      }
+
+      setSubmitting(
+        registerForm,
+        true,
+        "Création..."
+      );
+
+      showMessage(
+        message,
+        "Création du compte...",
+        "success"
+      );
+
+      try {
+        await publicRequest(
+          "/auth/register",
+          {
+            fullName,
+            email,
+            password,
+          }
+        );
+
+        showMessage(
+          message,
+          "Compte créé. Redirection vers la connexion...",
+          "success"
+        );
+
+        setTimeout(() => {
+          window.location.href =
+            "login.html";
+        }, 900);
+      } catch (error) {
+        showMessage(
+          message,
+          error.message ||
+          "Création du compte impossible."
+        );
+      } finally {
+        setSubmitting(
+          registerForm,
+          false,
+          "Création..."
+        );
+      }
     }
-  });
-}
+  );
+
+  bindPasswordVisibility(
+    "toggleLoginPassword",
+    "loginPassword"
+  );
+
+  bindPasswordVisibility(
+    "togglePassword",
+    "password"
+  );
+
+  bindPasswordVisibility(
+    "toggleConfirmPassword",
+    "confirmPassword"
+  );
+})();
